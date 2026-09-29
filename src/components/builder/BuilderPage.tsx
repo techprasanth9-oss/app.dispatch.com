@@ -8,11 +8,15 @@ import ImportHtmlDialog from './ImportHtmlDialog';
 import { htmlToEditorJS } from '../../lib/htmlToEditorJS';
 import { htmlToBlocks } from '@/lib/htmlToDragDrop';
 import SendTestEmailDialog from './SendTestEmailDialog';
-import { sendEmail } from '../../server/sendEmail';
+import VersionHistoryPanel from './VersionHistoryPanel';
+import VariablesPanel from './VariablesPanel';
 import Toast from '../common/Toast';
 import {
     createTemplate,
     updateTemplate,
+    sendTestEmail,
+    exportTemplate,
+    type TemplateVariable,
 } from '../../services/templateService';
 import { useAuth } from '../../store/authContext';
 
@@ -56,6 +60,25 @@ interface ProfessionalOptions {
     spacing: number;
 }
 
+/**
+ * Flatten every user-facing string out of the editor state so the variables
+ * panel can grep it for {{slug}} tokens. Stringifying the whole state is
+ * cheaper and simpler than walking the tree — the regex only cares about
+ * text content anyway, and non-text noise won't produce false positives.
+ */
+function editorTextForVariables(
+    editorData: unknown,
+    dragDropElements: unknown,
+    mode: 'editorjs' | 'dragdrop',
+): string {
+    try {
+        if (mode === 'editorjs') return JSON.stringify(editorData ?? {});
+        return JSON.stringify(dragDropElements ?? []);
+    } catch {
+        return '';
+    }
+}
+
 export default function BuilderPage() {
     const { workspaceId } = useAuth();
 
@@ -87,6 +110,13 @@ export default function BuilderPage() {
     }]);
     const [reInitializerEditor, setReInitializerEditor] = useState(false);
     const [showTestEmailDialog, setShowTestEmailDialog] = useState(false);
+    const [showVersionHistory, setShowVersionHistory] = useState(false);
+    const [currentTemplateVersion, setCurrentTemplateVersion] = useState<number>(1);
+    const [showVariables, setShowVariables] = useState(false);
+    const [variables, setVariables] = useState<TemplateVariable[]>([]);
+    // Per-slug values the user has typed into the preview modal's sidebar.
+    // Empty string means "use variable default"; unset means "not yet initialized".
+    const [sampleData, setSampleData] = useState<Record<string, string>>({});
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     // Save / load state
@@ -95,6 +125,23 @@ export default function BuilderPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const lastSavedDataRef = useRef<string>('');
+
+    // Autosave — debounced background save while editing
+    const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Undo/redo history — captures all editable design state
+    type Snapshot = {
+        editorData: EditorData;
+        dragDropElements: EmailElement[];
+        pageLayouts: PageLayout[];
+        professionalOptions: ProfessionalOptions;
+    };
+    const HISTORY_CAP = 50;
+    const historyRef = useRef<{ past: Snapshot[]; future: Snapshot[] }>({ past: [], future: [] });
+    const isRestoringRef = useRef(false);
+    const historyPushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [canUndo, setCanUndo] = useState(false);
+    const [canRedo, setCanRedo] = useState(false);
 
     const [professionalOptions, setProfessionalOptions] = useState<ProfessionalOptions>({
         fontFamily: "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
@@ -114,40 +161,87 @@ export default function BuilderPage() {
         lastSavedDataRef.current = JSON.stringify(data);
     };
 
-    // On mount: restore template from localStorage (set by TemplatesPage)
+    // On mount: restore template from sessionStorage (set by TemplatesPage on
+    // "Edit" click). sessionStorage rather than localStorage so a stale handoff
+    // can't leak across browser sessions or tabs. Every key is consumed exactly
+    // once and cleared immediately.
     useEffect(() => {
-        const tplId = localStorage.getItem('editingTemplateId');
-        const tplName = localStorage.getItem('editingTemplateName');
+        const readOnce = (key: string): string | null => {
+            const v = sessionStorage.getItem(key) ?? localStorage.getItem(key);
+            sessionStorage.removeItem(key);
+            localStorage.removeItem(key); // migrate away from any old localStorage handoffs
+            return v;
+        };
 
-        if (tplId) {
-            setEditingTemplateId(tplId);
-            localStorage.removeItem('editingTemplateId');
-        }
-        if (tplName) {
-            setTemplateName(tplName);
-            localStorage.removeItem('editingTemplateName');
-        }
+        const tplId = readOnce('editingTemplateId');
+        const tplName = readOnce('editingTemplateName');
+        const rawTpl = readOnce('selectedTemplate');
 
-        try {
-            const raw = localStorage.getItem('selectedTemplate');
-            if (raw) {
-                const parsed = JSON.parse(raw);
+        if (tplId) setEditingTemplateId(tplId);
+        if (tplName) setTemplateName(tplName);
+
+        if (rawTpl) {
+            try {
+                const parsed = JSON.parse(rawTpl);
                 if (parsed) {
                     setEditorData(parsed);
-                    lastSavedDataRef.current = raw;
+                    lastSavedDataRef.current = rawTpl;
                 }
-                localStorage.removeItem('selectedTemplate');
+            } catch (err) {
+                console.warn('Failed to load selected template from storage', err);
             }
-        } catch (err) {
-            console.warn('Failed to load selected template from storage', err);
         }
     }, []);
 
-    // Track unsaved changes
+    // Track unsaved changes + push history snapshot + schedule autosave.
+    // History push is debounced 250ms so rapid keystrokes coalesce into
+    // one undo step. Autosave debounced 3s so we don't hammer the API.
     useEffect(() => {
         const current = JSON.stringify(editorData);
-        setHasUnsavedChanges(current !== lastSavedDataRef.current);
-    }, [editorData]);
+        const isDirty = current !== lastSavedDataRef.current;
+        setHasUnsavedChanges(isDirty);
+
+        // ── History push ─────────────────────────────────────────
+        if (isRestoringRef.current) {
+            // This change came from undo/redo — don't record it again.
+            isRestoringRef.current = false;
+        } else {
+            if (historyPushTimerRef.current) clearTimeout(historyPushTimerRef.current);
+            historyPushTimerRef.current = setTimeout(() => {
+                const snap: Snapshot = {
+                    editorData,
+                    dragDropElements,
+                    pageLayouts,
+                    professionalOptions,
+                };
+                const last = historyRef.current.past[historyRef.current.past.length - 1];
+                // Skip if identical to the previous snapshot (no real change)
+                if (last && JSON.stringify(last) === JSON.stringify(snap)) return;
+                historyRef.current.past.push(snap);
+                if (historyRef.current.past.length > HISTORY_CAP) {
+                    historyRef.current.past.shift();
+                }
+                historyRef.current.future = [];
+                setCanUndo(true);
+                setCanRedo(false);
+            }, 250);
+        }
+
+        // ── Autosave ─────────────────────────────────────────────
+        if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+        if (isDirty && editingTemplateId && !isSaving) {
+            autosaveTimerRef.current = setTimeout(() => {
+                // Fire and forget — silent = no success toast; failures still show
+                handleSave({ silent: true });
+            }, 3000);
+        }
+
+        return () => {
+            if (historyPushTimerRef.current) clearTimeout(historyPushTimerRef.current);
+            if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editorData, dragDropElements, pageLayouts, professionalOptions, editingTemplateId, isSaving]);
 
     const clearCanvas = () => {
         if (builderMode === 'editorjs') {
@@ -201,11 +295,47 @@ export default function BuilderPage() {
         } else {
             html = buildEmailFromDragDrop(dragDropElements, pageLayouts[0], activeView);
         }
+        // Seed sample data with variable defaults for any slugs not already
+        // set by the user. Existing user input is preserved across re-opens.
+        setSampleData((prev) => {
+            const next = { ...prev };
+            for (const v of variables) {
+                if (next[v.slug] === undefined) next[v.slug] = v.defaultValue ?? '';
+            }
+            return next;
+        });
         setPreviewHtml(html);
     };
 
-    // Save template to API
-    const handleSave = async () => {
+    /**
+     * Replace {{slug}} tokens in the preview HTML with, in order of preference:
+     *   1. the value the user typed into the preview sidebar (sampleData)
+     *   2. the variable's stored defaultValue
+     *   3. the original token — so unresolved variables stay visible instead
+     *      of collapsing to an empty string, which is more useful for debugging
+     */
+    const substitutedPreviewHtml = (() => {
+        if (!previewHtml) return '';
+        return previewHtml.replace(
+            /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g,
+            (match, slug: string) => {
+                const s = sampleData[slug];
+                if (s !== undefined && s !== '') return s;
+                const v = variables.find((x) => x.slug === slug);
+                if (v?.defaultValue) return v.defaultValue;
+                return match;
+            },
+        );
+    })();
+
+    const resetSampleData = () => {
+        const next: Record<string, string> = {};
+        for (const v of variables) next[v.slug] = v.defaultValue ?? '';
+        setSampleData(next);
+    };
+
+    // Save template to API. `silent` skips the success toast — used by autosave.
+    const handleSave = async (opts: { silent?: boolean } = {}) => {
         if (!workspaceId) {
             setToast({ message: 'No workspace selected. Please log in again.', type: 'error' });
             return;
@@ -213,7 +343,6 @@ export default function BuilderPage() {
 
         setIsSaving(true);
         try {
-            // Generate compiled HTML for preview
             let compiledHtml = '';
             try {
                 compiledHtml = await buildEmailFromEditor(editorData, 'desktop', pageLayouts[0]);
@@ -224,6 +353,9 @@ export default function BuilderPage() {
                 editorData: editorData as unknown as Record<string, unknown>,
                 compiledHtml,
                 status: 'draft' as const,
+                // Only send variables when the user has customized them — otherwise
+                // let the backend's compileTemplate() auto-derive from the content.
+                ...(variables.length > 0 ? { variables } : {}),
             };
 
             let saved;
@@ -239,12 +371,133 @@ export default function BuilderPage() {
 
             lastSavedDataRef.current = JSON.stringify(editorData);
             setHasUnsavedChanges(false);
-            setToast({ message: `"${saved.name}" saved successfully`, type: 'success' });
+            if (typeof saved.version === 'number') {
+                setCurrentTemplateVersion(saved.version);
+            }
+            // Sync from server so auto-detected variables added by compileTemplate() show up
+            if (Array.isArray(saved.variables)) {
+                setVariables(saved.variables as TemplateVariable[]);
+            }
+            if (!opts.silent) {
+                setToast({ message: `"${saved.name}" saved successfully`, type: 'success' });
+            }
         } catch (err: any) {
+            // Even silent autosaves surface errors — the user should know.
             setToast({ message: err.message || 'Failed to save template', type: 'error' });
         } finally {
             setIsSaving(false);
         }
+    };
+
+    // ── Undo / Redo ─────────────────────────────────────────────────
+    // Snapshot restore. Guarded by isRestoringRef so the dirty/history
+    // effect doesn't re-record the state we just restored.
+
+    const applySnapshot = (snap: Snapshot) => {
+        isRestoringRef.current = true;
+        setEditorData(snap.editorData);
+        setDragDropElements(snap.dragDropElements);
+        setPageLayouts(snap.pageLayouts);
+        setProfessionalOptions(snap.professionalOptions);
+        setReInitializerEditor((v) => !v); // force EditorJS to re-mount with restored data
+    };
+
+    const undo = useCallback(() => {
+        const { past, future } = historyRef.current;
+        if (past.length === 0) return;
+        // Cancel any pending snapshot push so we don't re-record mid-undo
+        if (historyPushTimerRef.current) clearTimeout(historyPushTimerRef.current);
+        const current: Snapshot = {
+            editorData, dragDropElements, pageLayouts, professionalOptions,
+        };
+        const previous = past.pop()!;
+        future.unshift(current);
+        if (future.length > HISTORY_CAP) future.pop();
+        applySnapshot(previous);
+        setCanUndo(past.length > 0);
+        setCanRedo(true);
+    }, [editorData, dragDropElements, pageLayouts, professionalOptions]);
+
+    const redo = useCallback(() => {
+        const { past, future } = historyRef.current;
+        if (future.length === 0) return;
+        if (historyPushTimerRef.current) clearTimeout(historyPushTimerRef.current);
+        const current: Snapshot = {
+            editorData, dragDropElements, pageLayouts, professionalOptions,
+        };
+        const next = future.shift()!;
+        past.push(current);
+        if (past.length > HISTORY_CAP) past.shift();
+        applySnapshot(next);
+        setCanUndo(true);
+        setCanRedo(future.length > 0);
+    }, [editorData, dragDropElements, pageLayouts, professionalOptions]);
+
+    // ── Keyboard shortcuts ──────────────────────────────────────────
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            const isMac = navigator.platform.toUpperCase().includes('MAC');
+            const mod = isMac ? e.metaKey : e.ctrlKey;
+            if (!mod) return;
+            const key = e.key.toLowerCase();
+            if (key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undo();
+            } else if ((key === 'z' && e.shiftKey) || key === 'y') {
+                e.preventDefault();
+                redo();
+            } else if (key === 's') {
+                e.preventDefault();
+                handleSave();
+            }
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [undo, redo]);
+
+    // ── Multi-format export ─────────────────────────────────────────
+    // HTML: client-side render + download (no save needed — works on drafts)
+    // MJML / EJS: backend export — requires a saved template (has tplId)
+
+    const exportAs = async (format: 'html' | 'mjml' | 'ejs') => {
+        try {
+            if (format === 'html') {
+                const html = builderMode === 'editorjs'
+                    ? await buildEmailFromEditor(editorData, 'desktop', pageLayouts[0])
+                    : buildEmailFromDragDrop(dragDropElements, pageLayouts[0], 'desktop');
+                downloadFile(`${templateName || 'template'}.html`, html, 'text/html');
+                setToast({ message: 'HTML downloaded', type: 'success' });
+                return;
+            }
+
+            if (!editingTemplateId) {
+                setToast({
+                    message: `Save the template first, then export as ${format.toUpperCase()}.`,
+                    type: 'error',
+                });
+                return;
+            }
+            const res = await exportTemplate(editingTemplateId, format);
+            const output = res.data.output || res.data.rendered || '';
+            const mime = format === 'mjml' ? 'text/xml' : 'text/plain';
+            downloadFile(`${templateName || 'template'}.${format}`, output, mime);
+            setToast({ message: `${format.toUpperCase()} downloaded`, type: 'success' });
+        } catch (err: any) {
+            setToast({ message: err.message || `${format.toUpperCase()} export failed`, type: 'error' });
+        }
+    };
+
+    const downloadFile = (name: string, content: string, mime: string) => {
+        const blob = new Blob([content], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     const formatHtml = (html: string): string => {
@@ -353,8 +606,13 @@ export default function BuilderPage() {
                 html = buildEmailFromDragDrop(dragDropElements, pageLayouts[0], activeView);
             }
 
-            await sendEmail({ data: { to: emails, subject, htmlContent: html } });
-            setToast({ message: 'Test email sent successfully', type: 'success' });
+            const res = await sendTestEmail(emails, subject, html);
+            setToast({
+                message: `Test email delivered to ${res.data.delivered} recipient${
+                    res.data.delivered !== 1 ? 's' : ''
+                }`,
+                type: 'success',
+            });
         } catch (error: any) {
             console.error('Error sending test email:', error);
             setToast({ message: error.message || 'Failed to send test email', type: 'error' });
@@ -363,12 +621,21 @@ export default function BuilderPage() {
     };
 
     return (
-        <div className="h-screen flex flex-col bg-surface-50">
+        <div className="h-screen flex flex-col bg-paper">
             <BuilderHeader
                 activeView={activeView}
                 setActiveView={(v) => setActiveView(v)}
                 openPreview={openPreview}
                 exportHtml={exportHtml}
+                onExport={exportAs}
+                onUndo={undo}
+                onRedo={redo}
+                canUndo={canUndo}
+                canRedo={canRedo}
+                onOpenHistory={editingTemplateId ? () => setShowVersionHistory(true) : undefined}
+                onOpenVariables={() => setShowVariables(true)}
+                variableCount={variables.length}
+                variablesForInsert={variables}
                 showHtml={showHtml}
                 exportJson={exportJson}
                 clearCanvas={clearCanvas}
@@ -376,7 +643,7 @@ export default function BuilderPage() {
                 setBuilderMode={setBuilderMode}
                 onImportHtml={() => setShowImportHtmlDialog(true)}
                 onSendTestEmail={() => setShowTestEmailDialog(true)}
-                onSave={workspaceId ? handleSave : undefined}
+                onSave={workspaceId ? () => handleSave() : undefined}
                 isSaving={isSaving}
                 templateName={templateName}
                 hasUnsavedChanges={hasUnsavedChanges}
@@ -398,83 +665,154 @@ export default function BuilderPage() {
                 onDragDropElementsChange={setDragDropElements}
             />
 
-            {/* Preview Modal */}
+            {/* ── Preview modal ─────────────────────────────────────── */}
             {previewHtml && (
-                <div className="fixed inset-0 bg-surface-950/60 overlay-blur flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-7xl w-full max-h-[90vh] flex flex-col shadow-modal animate-scale-in">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200 flex-shrink-0">
-                            <h3 className="text-base font-semibold text-surface-900 tracking-tight">Email Preview</h3>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm">
+                    <div className="bg-surface rounded-xl max-w-7xl w-full max-h-[90vh] flex flex-col border border-line shadow-[0_24px_60px_-24px_rgba(20,20,20,0.25)]">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-line flex-shrink-0">
+                            <h3 className="font-serif text-[16px] font-semibold text-ink tracking-tight">
+                                Email preview
+                            </h3>
                             <div className="flex items-center gap-2">
-                                <div className="flex p-0.5 bg-surface-100 rounded-lg">
+                                <div className="flex p-0.5 bg-surface-sunken/60 border border-line rounded-md">
                                     <button
                                         onClick={() => setActiveView('desktop')}
-                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${activeView === 'desktop'
-                                            ? 'bg-white text-surface-900 shadow-subtle'
-                                            : 'text-surface-500 hover:text-surface-900'
-                                            }`}
+                                        className={[
+                                            'h-7 px-3 rounded text-[12px] font-medium transition-colors',
+                                            activeView === 'desktop'
+                                                ? 'bg-surface text-ink shadow-sm border border-line'
+                                                : 'text-ink-muted hover:text-ink border border-transparent',
+                                        ].join(' ')}
                                     >
                                         Desktop
                                     </button>
                                     <button
                                         onClick={() => setActiveView('mobile')}
-                                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${activeView === 'mobile'
-                                            ? 'bg-white text-surface-900 shadow-subtle'
-                                            : 'text-surface-500 hover:text-surface-900'
-                                            }`}
+                                        className={[
+                                            'h-7 px-3 rounded text-[12px] font-medium transition-colors',
+                                            activeView === 'mobile'
+                                                ? 'bg-surface text-ink shadow-sm border border-line'
+                                                : 'text-ink-muted hover:text-ink border border-transparent',
+                                        ].join(' ')}
                                     >
                                         Mobile
                                     </button>
                                 </div>
                                 <button
                                     onClick={async () => {
-                                        const html = builderMode === 'editorjs'
-                                            ? await buildEmailFromEditor(editorData, activeView, pageLayouts[0])
-                                            : buildEmailFromDragDrop(dragDropElements, pageLayouts[0], activeView);
-                                        const blob = new Blob([html], { type: 'text/html' });
+                                        // Export uses the *substituted* HTML so sample data flows into the tab
+                                        const blob = new Blob([substitutedPreviewHtml], { type: 'text/html' });
                                         const url = URL.createObjectURL(blob);
                                         window.open(url, '_blank');
                                     }}
-                                    className="px-3.5 py-1.5 bg-brand-700 text-white rounded-lg font-medium hover:bg-brand-800 transition-colors text-xs"
+                                    className="h-8 px-3 bg-accent hover:bg-accent-hover text-white rounded-md font-medium text-[12px] transition-colors"
                                 >
-                                    Open in New Tab
+                                    Open in new tab
                                 </button>
                                 <button
                                     onClick={() => setPreviewHtml(null)}
-                                    className="px-3.5 py-1.5 bg-surface-100 text-surface-700 rounded-lg font-medium hover:bg-surface-200 transition-colors text-xs"
+                                    className="h-8 px-3 bg-surface border border-line hover:border-line-strong text-ink rounded-md font-medium text-[12px] transition-colors"
                                 >
                                     Close
                                 </button>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto bg-surface-50 flex items-start justify-center p-8">
-                            <div className="w-full flex items-start justify-center min-h-full">
-                                <div
-                                    className={`bg-white shadow-elevated rounded-lg border border-surface-200 ${activeView === 'mobile' ? 'mobile-view-active' : ''}`}
-                                    style={{
-                                        width: activeView === 'mobile' ? '375px' : '600px',
-                                        maxWidth: activeView === 'mobile' ? '375px' : '600px',
-                                        backgroundColor: pageLayouts[0]?.background || '#ffffff',
-                                        backgroundImage: pageLayouts[0]?.backgroundImage ? `url(${pageLayouts[0]?.backgroundImage})` : undefined,
-                                        backgroundRepeat: pageLayouts[0]?.backgroundRepeat || 'no-repeat',
-                                        backgroundSize: pageLayouts[0]?.backgroundSize || 'cover',
-                                        transition: 'all 0.3s ease',
-                                        overflow: 'auto',
-                                        maxHeight: 'calc(100vh - 200px)',
-                                    }}
-                                    dangerouslySetInnerHTML={{ __html: previewHtml || '' }}
-                                />
+
+                        {/* Body: variables sidebar (if any) + preview stage */}
+                        <div className="flex-1 flex overflow-hidden">
+                            {variables.length > 0 && (
+                                <aside className="w-64 lg:w-72 border-r border-line bg-surface-sunken/40 flex flex-col overflow-hidden flex-shrink-0 hidden md:flex">
+                                    <div className="px-4 pt-4 pb-3 border-b border-line flex items-start justify-between gap-2">
+                                        <div className="min-w-0">
+                                            <h4 className="text-[10.5px] font-semibold text-ink uppercase tracking-[0.14em]">
+                                                Test data
+                                            </h4>
+                                            <p className="text-[11.5px] text-ink-muted mt-0.5 leading-snug">
+                                                {variables.length} variable{variables.length !== 1 ? 's' : ''} — try sample values live
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={resetSampleData}
+                                            className="text-[11.5px] font-medium text-ink-muted hover:text-ink transition-colors flex-shrink-0 mt-0.5"
+                                            title="Reset each field to its variable default"
+                                        >
+                                            Reset
+                                        </button>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                        {variables.map((v) => (
+                                            <div key={v.slug}>
+                                                <div className="flex items-baseline justify-between gap-2 mb-1">
+                                                    <label
+                                                        htmlFor={`sample-${v.slug}`}
+                                                        className="text-[12px] font-medium text-ink truncate"
+                                                    >
+                                                        {v.name}
+                                                    </label>
+                                                    <code className="font-mono text-[10.5px] text-ink-subtle truncate">
+                                                        {'{{'}
+                                                        {v.slug}
+                                                        {'}}'}
+                                                    </code>
+                                                </div>
+                                                <input
+                                                    id={`sample-${v.slug}`}
+                                                    type="text"
+                                                    value={sampleData[v.slug] ?? ''}
+                                                    onChange={(e) =>
+                                                        setSampleData((prev) => ({
+                                                            ...prev,
+                                                            [v.slug]: e.target.value,
+                                                        }))
+                                                    }
+                                                    className="w-full h-9 px-2.5 text-[13px] bg-surface border border-line rounded-md text-ink placeholder:text-ink-subtle focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 hover:border-line-strong transition-colors"
+                                                    placeholder={v.defaultValue || '—'}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="px-4 py-3 border-t border-line bg-surface/40">
+                                        <p className="text-[11px] text-ink-subtle leading-relaxed">
+                                            Empty fields fall back to variable defaults, then to the raw{' '}
+                                            <code className="font-mono">{'{{token}}'}</code> so unresolved
+                                            merges stay visible.
+                                        </p>
+                                    </div>
+                                </aside>
+                            )}
+
+                            <div className="flex-1 overflow-y-auto bg-paper flex items-start justify-center p-8">
+                                <div className="w-full flex items-start justify-center min-h-full">
+                                    <div
+                                        className={`bg-surface border border-line rounded-lg shadow-[0_16px_48px_-16px_rgba(20,20,20,0.12)] ${activeView === 'mobile' ? 'mobile-view-active' : ''}`}
+                                        style={{
+                                            width: activeView === 'mobile' ? '375px' : '600px',
+                                            maxWidth: activeView === 'mobile' ? '375px' : '600px',
+                                            backgroundColor: pageLayouts[0]?.background || '#ffffff',
+                                            backgroundImage: pageLayouts[0]?.backgroundImage ? `url(${pageLayouts[0]?.backgroundImage})` : undefined,
+                                            backgroundRepeat: pageLayouts[0]?.backgroundRepeat || 'no-repeat',
+                                            backgroundSize: pageLayouts[0]?.backgroundSize || 'cover',
+                                            transition: 'all 0.3s ease',
+                                            overflow: 'auto',
+                                            maxHeight: 'calc(100vh - 200px)',
+                                        }}
+                                        dangerouslySetInnerHTML={{ __html: substitutedPreviewHtml }}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* HTML Code Modal */}
+            {/* ── HTML code modal ───────────────────────────────────── */}
             {showHtmlDialog && (
-                <div className="fixed inset-0 bg-surface-950/60 overlay-blur flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-modal animate-scale-in">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200 flex-shrink-0">
-                            <h3 className="text-base font-semibold text-surface-900 tracking-tight">HTML Code</h3>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm">
+                    <div className="bg-surface rounded-xl max-w-5xl w-full max-h-[90vh] flex flex-col border border-line shadow-[0_24px_60px_-24px_rgba(20,20,20,0.25)] overflow-hidden">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-line flex-shrink-0">
+                            <h3 className="font-serif text-[16px] font-semibold text-ink tracking-tight">
+                                HTML code
+                            </h3>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={async () => {
@@ -487,21 +825,22 @@ export default function BuilderPage() {
                                         await navigator.clipboard.writeText(html);
                                         setToast({ message: 'HTML copied to clipboard', type: 'success' });
                                     }}
-                                    className="px-3.5 py-1.5 bg-surface-100 text-surface-700 rounded-lg font-medium hover:bg-surface-200 transition-colors text-xs"
+                                    className="h-8 px-3 bg-accent hover:bg-accent-hover text-white rounded-md font-medium text-[12px] transition-colors"
                                 >
                                     Copy
                                 </button>
                                 <button
                                     onClick={() => setShowHtmlDialog(false)}
-                                    className="px-3.5 py-1.5 bg-surface-100 text-surface-700 rounded-lg font-medium hover:bg-surface-200 transition-colors text-xs"
+                                    className="h-8 px-3 bg-surface border border-line hover:border-line-strong text-ink rounded-md font-medium text-[12px] transition-colors"
                                 >
                                     Close
                                 </button>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-auto p-6 bg-surface-900 rounded-b-2xl">
-                            <pre className="text-sm text-surface-100 font-mono whitespace-pre-wrap break-words overflow-x-auto">
-                                <code>{(htmlCode)}</code>
+                        {/* Ink-black code panel — deliberate high-contrast reading surface for code */}
+                        <div className="flex-1 overflow-auto p-6 bg-ink">
+                            <pre className="text-[13px] text-paper/90 font-mono whitespace-pre-wrap break-words overflow-x-auto leading-relaxed">
+                                <code>{htmlCode}</code>
                             </pre>
                         </div>
                     </div>
@@ -519,6 +858,40 @@ export default function BuilderPage() {
                 isOpen={showTestEmailDialog}
                 onClose={() => setShowTestEmailDialog(false)}
                 onSend={handleSendTestEmail}
+            />
+
+            <VariablesPanel
+                isOpen={showVariables}
+                onClose={() => setShowVariables(false)}
+                variables={variables}
+                onChange={(next) => setVariables(next)}
+                editorTextForDetection={editorTextForVariables(editorData, dragDropElements, builderMode)}
+            />
+
+            <VersionHistoryPanel
+                isOpen={showVersionHistory}
+                onClose={() => setShowVersionHistory(false)}
+                templateId={editingTemplateId}
+                currentVersion={currentTemplateVersion}
+                onRestored={(tpl) => {
+                    // Load restored editorData into the canvas and mark clean.
+                    if (tpl?.editorData) {
+                        setEditorData(tpl.editorData as EditorData);
+                        setReInitializerEditor((v) => !v);
+                        lastSavedDataRef.current = JSON.stringify(tpl.editorData);
+                        setHasUnsavedChanges(false);
+                    }
+                    if (typeof tpl?.version === 'number') {
+                        setCurrentTemplateVersion(tpl.version);
+                    }
+                    if (Array.isArray(tpl?.variables)) {
+                        setVariables(tpl.variables as TemplateVariable[]);
+                    }
+                    setToast({
+                        message: `Restored — now at version ${tpl?.version ?? '?'}`,
+                        type: 'success',
+                    });
+                }}
             />
 
             {toast && (

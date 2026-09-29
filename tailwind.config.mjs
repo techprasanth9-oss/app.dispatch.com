@@ -6,6 +6,8 @@ const config = {
     extend: {
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        serif: ["Fraunces", "Tinos", "Georgia", "serif"],
+        display: ["Fraunces", "Tinos", "Georgia", "serif"],
         dmsans: ["DM Sans", "sans-serif"],
         tinos: ["Tinos", "serif"],
         "back-street": ["back-street"],
@@ -23,6 +25,26 @@ const config = {
         "4xl": "2560px",
       },
       colors: {
+        /* ─────────────────────────────────────────────────────────────
+         * Mailix editorial semantic tokens
+         * Resolve to CSS variables defined in styles.css (:root + .dark).
+         * Prefer these over raw brand/surface scales in new code.
+         * ───────────────────────────────────────────────────────────── */
+        paper: "rgb(var(--color-paper) / <alpha-value>)",
+        ink: {
+          DEFAULT: "rgb(var(--color-ink) / <alpha-value>)",
+          muted: "rgb(var(--color-ink-muted) / <alpha-value>)",
+          subtle: "rgb(var(--color-ink-subtle) / <alpha-value>)",
+        },
+        line: {
+          DEFAULT: "rgb(var(--color-line) / <alpha-value>)",
+          strong: "rgb(var(--color-line-strong) / <alpha-value>)",
+        },
+        success: "rgb(var(--color-success) / <alpha-value>)",
+        warning: "rgb(var(--color-warning) / <alpha-value>)",
+        error: "rgb(var(--color-error) / <alpha-value>)",
+        ring: "rgb(var(--color-ring) / <alpha-value>)",
+
         primary: "rgba(var(--primary))",
         "primary-950": "rgba(var(--primary-950))",
         "primary-200": "rgba(var(--primary-200))",
@@ -59,6 +81,10 @@ const config = {
           950: "#023130",
         },
         surface: {
+          // Editorial semantic: bg-surface (cards/modals), bg-surface-sunken (hover/disabled)
+          DEFAULT: "rgb(var(--color-surface) / <alpha-value>)",
+          sunken: "rgb(var(--color-surface-sunken) / <alpha-value>)",
+          // Legacy slate scale — retained until per-screen refactors migrate off it
           50: "#f8fafc",
           100: "#f1f5f9",
           200: "#e2e8f0",
@@ -72,6 +98,11 @@ const config = {
           950: "#020617",
         },
         accent: {
+          // Editorial semantic: bg-accent (brand vermillion), hover, soft-tinted bg
+          DEFAULT: "rgb(var(--color-accent) / <alpha-value>)",
+          hover: "rgb(var(--color-accent-hover) / <alpha-value>)",
+          soft: "rgb(var(--color-accent-soft) / <alpha-value>)",
+          // Legacy orange scale — retained until per-screen refactors migrate off it
           50: "#fff7ed",
           100: "#ffedd5",
           200: "#fed7aa",

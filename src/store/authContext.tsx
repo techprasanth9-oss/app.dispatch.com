@@ -12,7 +12,7 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  /** Hydrate user + workspaces after auth cookies are set (e.g. after OTP verify / register). */
+  /** Hydrate user + workspaces after tokens are stored (e.g. after OTP verify / register). */
   bootstrap: () => Promise<void>
   logout: () => Promise<void>
   switchWorkspace: (workspace: Workspace) => void

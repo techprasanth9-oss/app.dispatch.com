@@ -70,7 +70,7 @@ export interface ListFilters {
 function wsPath(suffix: string): string {
   const wsId = getWorkspaceId()
   if (!wsId) throw new Error('No workspace selected')
-  return `/api/workspaces/${wsId}${suffix}`
+  return `/workspaces/${wsId}${suffix}`
 }
 
 function qs(filters: Record<string, unknown>): string {
@@ -146,6 +146,62 @@ export function copyFromGallery(predefinedTplId: string): Promise<TemplateSingle
   return api.post<TemplateSingleResponse>(wsPath(`/templates/from-gallery/${predefinedTplId}`))
 }
 
+// ── Test send ─────────────────────────────────────────────────────────────────
+
+export interface TestSendResponse {
+  success: boolean
+  data: { messageId: string; delivered: number }
+}
+
+/**
+ * Sends compiled HTML from the builder to a small list of recipients.
+ * No template save required — drafts can be tested before persisting.
+ */
+export function sendTestEmail(
+  to: string[],
+  subject: string,
+  html: string,
+): Promise<TestSendResponse> {
+  return api.post<TestSendResponse>(wsPath('/templates/test-send'), { to, subject, html })
+}
+
+// ── Version history ──────────────────────────────────────────────────────────
+
+export interface TemplateVersion {
+  _id: string
+  templateId: string
+  version: number
+  name: string
+  changeNote?: string | null
+  createdBy: string
+  createdAt: string
+}
+
+export interface VersionListResponse {
+  success: boolean
+  data: TemplateVersion[]
+  meta?: PaginationMeta
+}
+
+export function listVersions(
+  tplId: string,
+  page = 1,
+  limit = 20,
+): Promise<VersionListResponse> {
+  return api.get<VersionListResponse>(
+    wsPath(`/templates/${tplId}/versions?page=${page}&limit=${limit}`),
+  )
+}
+
+export function restoreVersion(
+  tplId: string,
+  versionId: string,
+): Promise<TemplateSingleResponse> {
+  return api.post<TemplateSingleResponse>(
+    wsPath(`/templates/${tplId}/versions/${versionId}/restore`),
+  )
+}
+
 // ── Gallery (predefined) ──────────────────────────────────────────────────────
 
 export interface GalleryResponse {
@@ -155,5 +211,5 @@ export interface GalleryResponse {
 
 export function listGallery(category?: string): Promise<GalleryResponse> {
   const q = category ? `?category=${encodeURIComponent(category)}` : ''
-  return api.get<GalleryResponse>(`/api/templates/gallery${q}`)
+  return api.get<GalleryResponse>(`/templates/gallery${q}`)
 }

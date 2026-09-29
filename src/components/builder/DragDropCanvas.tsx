@@ -54,7 +54,7 @@ function NestedElement({
         const elementStyle = {
             ...element.styles,
             position: 'relative' as const,
-            outline: isSelected ? '2px solid #4f46e5' : 'none',
+            outline: isSelected ? '2px solid #D14A2E' : 'none',
             outlineOffset: '2px',
         };
 
@@ -85,7 +85,7 @@ function NestedElement({
                     <div style={{ ...elementStyle, textAlign: element.styles?.textAlign || 'center' }} onClick={onSelect}>
                         <button
                             style={{
-                                backgroundColor: element.styles?.backgroundColor || '#4f46e5',
+                                backgroundColor: element.styles?.backgroundColor || '#D14A2E',
                                 color: element.styles?.color || '#ffffff',
                                 padding: element.styles?.padding || '12px 24px',
                                 borderRadius: element.styles?.borderRadius || '8px',
@@ -142,16 +142,16 @@ function NestedElement({
             <div className="relative">
                 {renderElement()}
                 {isSelected && (
-                    <div className="absolute -top-8 right-0 flex items-center space-x-1 bg-brand-700 text-white px-2 py-1 rounded text-xs z-10">
-                        <span className="text-xs">{element.type}</span>
+                    <div className="absolute -top-8 right-0 flex items-center gap-1 bg-ink text-paper px-2 py-1 rounded-md text-[11px] font-medium uppercase tracking-wide z-10 shadow-[0_4px_16px_-4px_rgba(20,20,20,0.35)]">
+                        <span>{element.type}</span>
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onDelete();
                             }}
-                            className="ml-2 hover:bg-brand-800 rounded px-1"
+                            className="ml-1 hover:bg-error/80 rounded px-1"
                         >
-                            🗑️
+                            ×
                         </button>
                     </div>
                 )}
@@ -221,7 +221,7 @@ function SortableElement({
         const elementStyle = {
             ...element.styles,
             position: 'relative' as const,
-            outline: isSelected ? '2px solid #4f46e5' : 'none',
+            outline: isSelected ? '2px solid #D14A2E' : 'none',
             outlineOffset: '2px',
             minHeight: element.type === 'div' || element.type === 'columns' ? '60px' : undefined,
         };
@@ -454,7 +454,7 @@ function SortableElement({
                     ${isSelected ? 'opacity-100' : ''}
                 `}
             >
-                <div className="w-1 h-full bg-surface-300 hover:bg-brand-500 rounded-full" />
+                <div className="w-1 h-full bg-line hover:bg-accent rounded-full transition-colors" />
             </div>
         </div>
     );
@@ -468,7 +468,7 @@ function DroppableCanvas({ children }: { children: React.ReactNode }) {
     return (
         <div
             ref={setNodeRef}
-            className={`min-h-[600px] ${isOver ? 'bg-brand-50 border-2 border-brand-400 border-dashed' : ''}`}
+            className={`min-h-[600px] transition-colors ${isOver ? 'bg-accent-soft/60 border-2 border-accent border-dashed rounded-md' : ''}`}
         >
             {children}
         </div>
@@ -493,12 +493,16 @@ export default function DragDropCanvas({
         return (
             <DroppableCanvas>
                 <div
-                    className="flex items-center justify-center min-h-[600px] border-2 border-dashed border-surface-300 rounded-lg"
+                    className="flex items-center justify-center min-h-[600px] border-2 border-dashed border-line rounded-md bg-surface-sunken/20"
                     onClick={() => onSelectElement(null)}
                 >
-                    <div className="text-center text-surface-400">
-                        <p className="text-lg mb-2">Empty Canvas</p>
-                        <p className="text-sm">Drag elements from the left panel to start building</p>
+                    <div className="text-center">
+                        <p className="font-serif text-[18px] font-semibold text-ink mb-1.5">
+                            Empty canvas
+                        </p>
+                        <p className="text-[13px] text-ink-muted">
+                            Drag elements from the left panel to start building
+                        </p>
                     </div>
                 </div>
             </DroppableCanvas>

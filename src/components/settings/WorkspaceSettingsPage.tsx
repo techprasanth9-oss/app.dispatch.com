@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Crown, Mail, Plus, Trash2, UserPlus, AlertTriangle, X, Check } from 'lucide-react'
 import { useAuth } from '../../store/authContext'
-import AppHeader from '../ui/AppHeader'
 import {
   listMembers,
   inviteMember,
@@ -48,14 +47,7 @@ export default function WorkspaceSettingsPage() {
   }, [reload])
 
   if (!workspace) {
-    return (
-      <>
-        <AppHeader />
-        <main className="max-w-4xl mx-auto px-6 py-10">
-          <p className="text-surface-500">No active workspace.</p>
-        </main>
-      </>
-    )
+    return <p className="text-ink-muted">No active workspace.</p>
   }
 
   const canInvite = effectiveRole === 'owner' || effectiveRole === 'admin'
@@ -63,8 +55,7 @@ export default function WorkspaceSettingsPage() {
 
   return (
     <>
-      <AppHeader />
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+      <main className="space-y-8">
         <header>
           <p className="text-xs font-semibold tracking-wider text-surface-400 uppercase">Workspace settings</p>
           <h1 className="mt-1 text-2xl font-semibold text-surface-900">{workspace.name}</h1>

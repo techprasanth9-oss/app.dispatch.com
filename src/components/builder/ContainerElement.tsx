@@ -61,7 +61,7 @@ export default function ContainerElement({
     const elementStyle = {
         ...element.styles,
         position: 'relative' as const,
-        outline: isSelected ? '2px solid #4f46e5' : 'none',
+        outline: isSelected ? '2px solid #D14A2E' : 'none',
         outlineOffset: '2px',
         minHeight: '60px',
     };
@@ -82,7 +82,7 @@ export default function ContainerElement({
                             onSelect();
                         }
                     }}
-                    className={`relative ${isOver ? 'bg-brand-50 border-2 border-brand-400 border-dashed' : ''}`}
+                    className={`relative ${isOver ? 'bg-accent-soft/60 border-2 border-accent border-dashed' : ''}`}
                 >
                     {element.children && element.children.length > 0 ? (
                         <SortableContext items={element.children.map(el => el.id)} strategy={verticalListSortingStrategy}>
@@ -198,8 +198,8 @@ export default function ContainerElement({
                             </div>
                         </SortableContext>
                     ) : (
-                        <div className="text-surface-400 text-sm py-8 text-center border-2 border-dashed border-surface-300 rounded">
-                            Empty container - Add elements here
+                        <div className="text-ink-subtle text-[13px] py-8 text-center border-2 border-dashed border-line rounded-md bg-surface-sunken/30">
+                            Empty container — add elements here
                         </div>
                     )}
                     <AddElementButton
@@ -229,7 +229,7 @@ export default function ContainerElement({
                     ${isSelected ? 'opacity-100' : ''}
                 `}
             >
-                <div className="w-1 h-full bg-surface-300 hover:bg-brand-500 rounded-full" />
+                <div className="w-1 h-full bg-line hover:bg-accent rounded-full transition-colors" />
             </div>
         </div>
     );

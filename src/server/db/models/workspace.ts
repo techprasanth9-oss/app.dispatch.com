@@ -5,6 +5,12 @@ export interface IWorkspaceDocument extends Document {
   name: string
   slug: string
   logo: string | null
+  website: string | null
+  description: string | null
+  industry: string | null
+  companySize: string | null
+  useCases: string[]
+  timezone: string | null
   ownerId: Types.ObjectId
   brandColor: string | null
   brandFont: string | null
@@ -24,7 +30,16 @@ const workspaceSchema = new Schema<IWorkspaceDocument>(
   {
     name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true },
+    // Data URL (base64) today; migrate to cloud storage before scale.
     logo: { type: String, default: null },
+    website: { type: String, default: null, trim: true },
+    description: { type: String, default: null, trim: true },
+    industry: { type: String, default: null },
+    companySize: { type: String, default: null },
+    // Free-form multi-select of use cases (transactional, marketing, newsletters, etc.)
+    // Values validated against constants on write; schema stays flexible.
+    useCases: { type: [String], default: [] },
+    timezone: { type: String, default: null },
     ownerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     brandColor: { type: String, default: null },
     brandFont: { type: String, default: null },

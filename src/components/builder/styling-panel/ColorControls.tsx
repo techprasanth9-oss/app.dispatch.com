@@ -1,80 +1,79 @@
-import { useState, useEffect } from 'react';
-import { Type, PaintBucket, Pipette } from 'lucide-react';
-import StylingSection from './StylingSection';
-import StylingRow from './StylingRow';
+import { useState, useEffect } from 'react'
+import { Type, PaintBucket, Pipette } from 'lucide-react'
+import StylingSection from './StylingSection'
 
 interface ColorControlsProps {
-    styles: any;
-    onUpdate: (key: string, value: string) => void;
-    elementType: string;
+    styles: any
+    onUpdate: (key: string, value: string) => void
+    elementType: string
 }
 
+// Editorial neutrals first, then a broad user-facing palette. This is a
+// picker for the user's design — not the app palette — so we keep bright
+// hues available.
 const defaultColors = [
-    '#ffffff', '#000000', '#F3F4F6', '#E5E7EB', '#D1D5DB', '#9CA3AF', '#6B7280', '#4B5563', '#374151', '#1F2937', '#111827', // Grays
-    '#EF4444', '#F87171', // Red
-    '#F59E0B', '#FBBF24', // Amber
-    '#10B981', '#34D399', // Emerald
-    '#3B82F6', '#60A5FA', // Blue
-    '#6366F1', '#818CF8', // Indigo
-    '#8B5CF6', '#A78BFA', // Violet
-    '#EC4899', '#F472B6', // Pink
-];
+    '#F7F3EC', '#FFFFFF', '#EFEAE0', '#E5DED2', '#6B6560', '#141414', '#000000',
+    '#D14A2E', '#B23A1E', '#C08A2E', '#5A7A3E',
+    '#EF4444', '#F87171', '#F59E0B', '#FBBF24',
+    '#10B981', '#34D399', '#3B82F6', '#60A5FA',
+    '#6366F1', '#818CF8', '#8B5CF6', '#A78BFA',
+    '#EC4899', '#F472B6',
+]
 
 export default function ColorControls({ styles, onUpdate, elementType }: ColorControlsProps) {
-    const [activeTab, setActiveTab] = useState<'text' | 'background'>('text');
+    const [activeTab, setActiveTab] = useState<'text' | 'background'>('text')
+    const hasText = ['heading', 'paragraph', 'button', 'list'].includes(elementType)
 
-    // Determine if text color is applicable
-    const hasText = ['heading', 'paragraph', 'button', 'list'].includes(elementType);
-
-    // If element doesn't have text, default to background tab
     useEffect(() => {
-        if (!hasText) {
-            setActiveTab('background');
-        }
-    }, [hasText]);
-
+        if (!hasText) setActiveTab('background')
+    }, [hasText])
 
     const handleColorChange = (color: string) => {
-        onUpdate(activeTab === 'text' ? 'color' : 'backgroundColor', color);
-    };
+        onUpdate(activeTab === 'text' ? 'color' : 'backgroundColor', color)
+    }
 
-    const currentColor = activeTab === 'text'
-        ? (styles?.color || '#000000')
-        : (styles?.backgroundColor || 'transparent');
+    const currentColor =
+        activeTab === 'text'
+            ? styles?.color || '#000000'
+            : styles?.backgroundColor || 'transparent'
 
     return (
-        <StylingSection title="Colors" defaultOpen={true}>
+        <StylingSection title="Colors" defaultOpen>
             {hasText && (
-                <div className="flex bg-surface-100 p-0.5 rounded-lg border border-surface-200 mb-4">
+                <div className="flex bg-surface-sunken/60 p-0.5 rounded-md border border-line mb-4">
                     <button
                         onClick={() => setActiveTab('text')}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === 'text'
-                            ? 'bg-white text-brand-700 shadow-sm ring-1 ring-black/5'
-                            : 'text-surface-500 hover:text-surface-700 hover:bg-surface-200/50'
-                            }`}
+                        className={[
+                            'flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[12px] font-medium rounded transition-colors',
+                            activeTab === 'text'
+                                ? 'bg-surface text-ink shadow-sm border border-line'
+                                : 'text-ink-muted hover:text-ink border border-transparent',
+                        ].join(' ')}
                     >
-                        <Type className="w-3.5 h-3.5" />
-                        <span>Text</span>
+                        <Type className="w-3.5 h-3.5" strokeWidth={1.75} />
+                        Text
                     </button>
                     <button
                         onClick={() => setActiveTab('background')}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === 'background'
-                            ? 'bg-white text-brand-700 shadow-sm ring-1 ring-black/5'
-                            : 'text-surface-500 hover:text-surface-700 hover:bg-surface-200/50'
-                            }`}
+                        className={[
+                            'flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[12px] font-medium rounded transition-colors',
+                            activeTab === 'background'
+                                ? 'bg-surface text-ink shadow-sm border border-line'
+                                : 'text-ink-muted hover:text-ink border border-transparent',
+                        ].join(' ')}
                     >
-                        <PaintBucket className="w-3.5 h-3.5" />
-                        <span>Background</span>
+                        <PaintBucket className="w-3.5 h-3.5" strokeWidth={1.75} />
+                        Background
                     </button>
                 </div>
             )}
 
             <div className="space-y-4">
-                {/* Color Input Area */}
+                {/* Color picker + hex input */}
                 <div className="flex items-center gap-3">
-                    <div className="relative group">
+                    <div className="relative">
                         <div
-                            className="w-10 h-10 rounded-lg shadow-sm border border-surface-200 cursor-pointer overflow-hidden relative ring-1 ring-transparent group-hover:ring-brand-500 transition-all"
+                            className="w-10 h-10 rounded-md border-2 border-surface ring-1 ring-line cursor-pointer overflow-hidden hover:ring-line-strong transition-all"
                             style={{ backgroundColor: currentColor }}
                         >
                             <input
@@ -84,18 +83,20 @@ export default function ColorControls({ styles, onUpdate, elementType }: ColorCo
                                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                             />
                         </div>
-                        <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow border border-surface-100 pointer-events-none">
-                            <Pipette className="w-2.5 h-2.5 text-surface-400" />
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-surface rounded-full border border-line flex items-center justify-center pointer-events-none">
+                            <Pipette className="w-2 h-2 text-ink-muted" strokeWidth={1.75} />
                         </div>
                     </div>
                     <div className="flex-1">
-                        <div className="flex items-center border border-surface-200 rounded-lg bg-white px-3 py-2 transition-all focus-within:ring-1 focus-within:ring-brand-500 focus-within:border-brand-500">
-                            <span className="text-surface-400 text-xs mr-2 font-mono select-none">#</span>
+                        <div className="flex items-center h-10 border border-line rounded-md bg-surface px-3 focus-within:ring-2 focus-within:ring-accent/15 focus-within:border-accent hover:border-line-strong transition-colors">
+                            <span className="text-ink-subtle text-[13px] font-mono select-none mr-1">
+                                #
+                            </span>
                             <input
                                 type="text"
                                 value={currentColor.replace('#', '')}
                                 onChange={(e) => handleColorChange(`#${e.target.value}`)}
-                                className="w-full text-sm font-mono text-surface-700 focus:outline-none uppercase tracking-wide"
+                                className="w-full text-[13px] font-mono text-ink bg-transparent focus:outline-none uppercase tracking-wide"
                                 placeholder="FFFFFF"
                                 maxLength={6}
                             />
@@ -105,16 +106,20 @@ export default function ColorControls({ styles, onUpdate, elementType }: ColorCo
 
                 {/* Presets */}
                 <div>
-                    <label className="text-[10px] uppercase font-semibold text-surface-400 tracking-wider mb-2 block">Presets</label>
-                    <div className="grid grid-cols-8 gap-2">
+                    <label className="text-[10px] uppercase font-semibold text-ink-subtle tracking-[0.12em] mb-2 block">
+                        Presets
+                    </label>
+                    <div className="grid grid-cols-8 gap-1.5">
                         {defaultColors.map((color) => (
                             <button
                                 key={color}
                                 onClick={() => handleColorChange(color)}
-                                className={`w-full aspect-square rounded border border-surface-200 hover:scale-110 transition-transform ${currentColor.toLowerCase() === color.toLowerCase()
-                                    ? 'ring-2 ring-brand-500 ring-offset-1 border-transparent z-10'
-                                    : 'hover:border-surface-300'
-                                    }`}
+                                className={[
+                                    'w-full aspect-square rounded border transition-all',
+                                    currentColor.toLowerCase() === color.toLowerCase()
+                                        ? 'ring-2 ring-accent ring-offset-1 ring-offset-surface border-accent z-10 scale-110'
+                                        : 'border-line hover:border-line-strong hover:scale-105',
+                                ].join(' ')}
                                 style={{ backgroundColor: color }}
                                 title={color}
                             />
@@ -122,20 +127,29 @@ export default function ColorControls({ styles, onUpdate, elementType }: ColorCo
                     </div>
                 </div>
 
-                {/* Background Image Options only show when Background tab is active */}
                 {activeTab === 'background' && (
-                    <div className="pt-3 border-t border-surface-100 mt-2">
-                        <label className="text-[10px] uppercase font-semibold text-surface-400 tracking-wider mb-2 block">Background Image</label>
+                    <div className="pt-3 border-t border-line mt-2">
+                        <label className="text-[10px] uppercase font-semibold text-ink-subtle tracking-[0.12em] mb-2 block">
+                            Background image
+                        </label>
                         <input
                             type="text"
-                            value={(styles?.backgroundImage || '').replace(/^url\(["']?(.*)["']?\)$/, '$1')}
-                            onChange={(e) => onUpdate('backgroundImage', e.target.value ? `url(${e.target.value})` : '')}
-                            className="w-full px-3 py-2 text-sm border border-surface-200 rounded-lg focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 transition-all placeholder:text-surface-300"
+                            value={(styles?.backgroundImage || '').replace(
+                                /^url\(["']?(.*)["']?\)$/,
+                                '$1',
+                            )}
+                            onChange={(e) =>
+                                onUpdate(
+                                    'backgroundImage',
+                                    e.target.value ? `url(${e.target.value})` : '',
+                                )
+                            }
+                            className="w-full h-9 px-3 text-[13px] border border-line rounded-md bg-surface text-ink focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 hover:border-line-strong transition-colors placeholder:text-ink-subtle"
                             placeholder="https://example.com/image.jpg"
                         />
                     </div>
                 )}
             </div>
         </StylingSection>
-    );
+    )
 }

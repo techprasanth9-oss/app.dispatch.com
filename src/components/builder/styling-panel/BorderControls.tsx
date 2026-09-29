@@ -1,33 +1,31 @@
-
-import { Square, Circle } from 'lucide-react';
-import StylingSection from './StylingSection';
-import StylingRow from './StylingRow';
-
+import { Square, Circle } from 'lucide-react'
+import StylingSection from './StylingSection'
+import StylingRow from './StylingRow'
 
 interface BorderControlsProps {
-    styles: any;
-    onUpdate: (key: string, value: string) => void;
+    styles: any
+    onUpdate: (key: string, value: string) => void
 }
 
 export default function BorderControls({ styles, onUpdate }: BorderControlsProps) {
-    const borderStyle = styles?.borderStyle || 'none';
-    const borderWidth = styles?.borderWidth || '0px';
-    const borderColor = styles?.borderColor || '#000000';
-    const borderRadius = styles?.borderRadius || '0px';
+    const borderStyle = styles?.borderStyle || 'none'
+    const borderWidth = styles?.borderWidth || '0px'
+    const borderColor = styles?.borderColor || '#000000'
+    const borderRadius = styles?.borderRadius || '0px'
 
     const updateBorder = (key: string, value: string) => {
-        // If enabling border, ensure defaults are set
+        // Auto-seed sensible defaults when enabling a border for the first time
         if (key === 'borderStyle' && value !== 'none' && !styles?.borderWidth) {
-            onUpdate('borderWidth', '1px');
-            onUpdate('borderColor', '#e5e7eb');
+            onUpdate('borderWidth', '1px')
+            onUpdate('borderColor', '#E5DED2')
         }
-        onUpdate(key, value);
-    };
+        onUpdate(key, value)
+    }
 
     return (
-        <StylingSection title="Border & Radius" defaultOpen={false}>
-            {/* Radius Presets */}
-            <StylingRow label="Corner Radius">
+        <StylingSection title="Border & radius" defaultOpen={false}>
+            {/* Radius presets */}
+            <StylingRow label="Corner radius">
                 <div className="grid grid-cols-5 gap-1.5">
                     {[
                         { label: 'None', value: '0px', icon: Square },
@@ -39,33 +37,38 @@ export default function BorderControls({ styles, onUpdate }: BorderControlsProps
                         <button
                             key={preset.value}
                             onClick={() => onUpdate('borderRadius', preset.value)}
-                            className={`h-8 flex items-center justify-center rounded border transition-all ${borderRadius === preset.value
-                                ? 'border-brand-500 bg-brand-50 text-brand-700'
-                                : 'border-surface-200 bg-white text-surface-500 hover:border-surface-300'
-                                }`}
+                            className={[
+                                'h-9 flex items-center justify-center rounded-md border transition-colors',
+                                borderRadius === preset.value
+                                    ? 'border-accent bg-accent-soft/60 text-accent'
+                                    : 'border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink',
+                            ].join(' ')}
                             title={preset.label}
                         >
-                            {preset.icon ? <preset.icon className="w-3.5 h-3.5" /> : <span className="text-[10px] font-medium">{preset.label}</span>}
+                            {preset.icon ? (
+                                <preset.icon className="w-3.5 h-3.5" strokeWidth={1.75} />
+                            ) : (
+                                <span className="text-[11px] font-medium">{preset.label}</span>
+                            )}
                         </button>
                     ))}
                 </div>
             </StylingRow>
 
-            <div className="h-px bg-surface-100 my-3" />
+            <div className="h-px bg-line my-3" />
 
-            <StylingRow label="Border Style">
-                <div className="grid grid-cols-3 gap-1.5">
+            <StylingRow label="Border style">
+                <div className="grid grid-cols-4 gap-1.5">
                     {['none', 'solid', 'dashed', 'dotted'].map((style) => (
                         <button
                             key={style}
-                            // Use slice to avoid showing 4 items in 3 cols, maybe group differently?
-                            // Let's just list simplified ones or scroll?
-                            // 4 items: grid-cols-4 better? Or just common ones.
                             onClick={() => updateBorder('borderStyle', style)}
-                            className={`py-1.5 text-[10px] capitalize font-medium rounded border transition-all ${borderStyle === style
-                                ? 'border-brand-500 bg-brand-50 text-brand-700'
-                                : 'border-surface-200 bg-white text-surface-500 hover:border-surface-300'
-                                }`}
+                            className={[
+                                'h-8 text-[11px] capitalize font-medium rounded-md border transition-colors',
+                                borderStyle === style
+                                    ? 'border-accent bg-accent-soft/60 text-accent'
+                                    : 'border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink',
+                            ].join(' ')}
                         >
                             {style}
                         </button>
@@ -83,34 +86,36 @@ export default function BorderControls({ styles, onUpdate }: BorderControlsProps
                                 max="10"
                                 value={parseInt(borderWidth) || 1}
                                 onChange={(e) => updateBorder('borderWidth', `${e.target.value}px`)}
-                                className="flex-1 h-1.5 bg-surface-200 rounded-lg appearance-none cursor-pointer accent-brand-700"
+                                className="flex-1 h-1.5 bg-line rounded-lg appearance-none cursor-pointer accent-accent"
                             />
-                            <span className="text-xs w-8 text-right font-mono text-surface-500">{borderWidth}</span>
+                            <span className="text-[12px] w-10 text-right font-mono text-ink-muted">
+                                {borderWidth}
+                            </span>
                         </div>
                     </StylingRow>
 
                     <StylingRow label="Color">
                         <div className="flex items-center gap-2">
                             <div
-                                className="w-6 h-6 rounded border border-surface-200 shadow-sm"
+                                className="w-7 h-7 rounded border border-line"
                                 style={{ backgroundColor: borderColor }}
                             />
                             <input
                                 type="text"
                                 value={borderColor}
                                 onChange={(e) => updateBorder('borderColor', e.target.value)}
-                                className="flex-1 px-2 py-1 text-xs border border-surface-200 rounded font-mono uppercase focus:outline-none focus:border-brand-500"
+                                className="flex-1 h-8 px-2 text-[12px] border border-line rounded bg-surface text-ink font-mono uppercase focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/15"
                             />
                             <input
                                 type="color"
                                 value={borderColor}
                                 onChange={(e) => updateBorder('borderColor', e.target.value)}
-                                className="w-6 h-6 p-0 border-0 rounded overflow-hidden cursor-pointer"
+                                className="w-7 h-7 p-0 border border-line rounded overflow-hidden cursor-pointer"
                             />
                         </div>
                     </StylingRow>
                 </div>
             )}
         </StylingSection>
-    );
+    )
 }

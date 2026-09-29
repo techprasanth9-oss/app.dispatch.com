@@ -23,7 +23,7 @@ export interface CategorySingleResponse {
 function wsPath(suffix: string): string {
   const wsId = getWorkspaceId()
   if (!wsId) throw new Error('No workspace selected')
-  return `/api/workspaces/${wsId}${suffix}`
+  return `/workspaces/${wsId}${suffix}`
 }
 
 export function listCategories(): Promise<CategoryListResponse> {

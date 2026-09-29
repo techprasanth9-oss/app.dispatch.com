@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Palette from './Palette'
 import EditorJSComponent from '../EditorJs'
 import PropertiesPanel from './PropertiesPanel'
@@ -21,6 +21,11 @@ interface Props {
     onDragDropElementsChange: (elements: EmailElement[]) => void
 }
 
+/**
+ * Three-pane editor frame: templates gallery (left), canvas (center),
+ * properties (right). The DragDropBuilder is a separate top-level frame,
+ * so this component only builds the EditorJS three-pane layout.
+ */
 export default function BuilderWorkspace({
     builderMode,
     editorData,
@@ -34,15 +39,14 @@ export default function BuilderWorkspace({
     loadTemplate,
     reInitializerEditor,
     dragDropElements,
-    onDragDropElementsChange
+    onDragDropElementsChange,
 }: Props) {
     const [isLoaded, setIsLoaded] = useState(false)
     const canvasRef = useRef<HTMLDivElement>(null)
 
-    // Trigger entrance animations
     useEffect(() => {
-        const timer = setTimeout(() => setIsLoaded(true), 100)
-        return () => clearTimeout(timer)
+        const t = setTimeout(() => setIsLoaded(true), 100)
+        return () => clearTimeout(t)
     }, [])
 
     const handleEditorHeightChange = (_pageIndex: number, height: number) => {
@@ -59,94 +63,99 @@ export default function BuilderWorkspace({
                 pageLayouts={pageLayouts}
                 activeView={activeView}
             />
-        );
+        )
     }
 
     return (
-        <div className="flex-1 flex overflow-hidden bg-surface-50/50">
-            {/* Left Side - Templates Panel */}
-            <div 
-                className={`
-                    w-72 lg:w-80 bg-white border-r border-surface-200/80 
-                    flex flex-col h-full flex-shrink-0 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.08)]
-                    transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-                    ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}
-                `}
+        <div className="flex-1 flex overflow-hidden bg-paper">
+            {/* ── Left: Templates gallery ────────────────────────────── */}
+            <aside
+                className={[
+                    'w-72 lg:w-80 bg-surface border-r border-line',
+                    'flex flex-col h-full flex-shrink-0',
+                    'transition-all duration-400 ease-out',
+                    isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4',
+                ].join(' ')}
             >
-                {/* Panel Header */}
-                <div className="p-5 border-b border-surface-200/80 flex-shrink-0 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-                    <div className="flex items-center gap-3 mb-1">
-                        <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center">
-                            <LayoutTemplate className="w-4 h-4 text-brand-600" />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-semibold text-surface-900 tracking-tight">Templates</h3>
-                            <p className="text-[11px] text-surface-500">Pre-designed layouts</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Templates Content */}
+                <PanelHeader
+                    icon={<LayoutTemplate className="w-4 h-4 text-accent" strokeWidth={1.75} />}
+                    title="Templates"
+                    subtitle="Pre-designed layouts"
+                />
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                     <div className="space-y-3">
                         <Palette loadTemplate={loadTemplate} />
                     </div>
                 </div>
-            </div>
+            </aside>
 
-            {/* Center - Canvas */}
-            <div 
-                className={`
-                    flex-1 bg-surface-50 flex flex-col overflow-hidden min-w-0 relative
-                    transition-all duration-500 delay-100 ease-[cubic-bezier(0.4,0,0.2,1)]
-                    ${isLoaded ? 'opacity-100' : 'opacity-0'}
-                `}
+            {/* ── Center: Canvas ─────────────────────────────────────── */}
+            <section
+                className={[
+                    'flex-1 bg-paper flex flex-col overflow-hidden min-w-0 relative',
+                    'transition-opacity duration-400 delay-75 ease-out',
+                    isLoaded ? 'opacity-100' : 'opacity-0',
+                ].join(' ')}
             >
-                {/* Canvas Header */}
-                <div className="bg-white/90 backdrop-blur-md border-b border-surface-200/80 px-6 py-4 flex-shrink-0 z-20 sticky top-0">
+                {/* Canvas header — sits above the canvas, editorial toolbar strip */}
+                <div className="bg-paper/90 backdrop-blur-md border-b border-line px-6 py-3 flex-shrink-0 z-20 sticky top-0">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-7 h-7 rounded-md bg-surface-100 flex items-center justify-center">
-                                <Layers className="w-3.5 h-3.5 text-surface-500" />
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-md bg-surface border border-line flex items-center justify-center">
+                                <Layers className="w-3.5 h-3.5 text-ink-muted" strokeWidth={1.75} />
                             </div>
                             <div>
-                                <h2 className="text-xs font-semibold text-surface-900 uppercase tracking-wider">Canvas</h2>
-                                <p className="text-[10px] text-surface-400 mt-0.5">Design your email</p>
+                                <h2 className="text-[10.5px] font-semibold text-ink uppercase tracking-[0.14em]">
+                                    Canvas
+                                </h2>
+                                <p className="text-[10.5px] text-ink-subtle mt-0.5">
+                                    Design your email
+                                </p>
                             </div>
                         </div>
-                        
-                        {/* View Indicator */}
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-100 rounded-full">
+
+                        {/* View indicator */}
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-surface-sunken/60 border border-line rounded-full">
                             {activeView === 'desktop' ? (
-                                <Monitor className="w-3.5 h-3.5 text-surface-500" />
+                                <Monitor className="w-3.5 h-3.5 text-ink-muted" strokeWidth={1.75} />
                             ) : (
-                                <Smartphone className="w-3.5 h-3.5 text-surface-500" />
+                                <Smartphone className="w-3.5 h-3.5 text-ink-muted" strokeWidth={1.75} />
                             )}
-                            <span className="text-[11px] font-medium text-surface-600 capitalize">{activeView} View</span>
+                            <span className="text-[11px] font-medium text-ink-muted capitalize">
+                                {activeView}
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                {/* Canvas Content */}
+                {/* Canvas surface — actual paper the email lives on */}
                 <div className="flex-1 overflow-auto p-8 lg:p-12 relative custom-scrollbar">
                     <div className="flex items-start justify-center min-h-full pb-20">
                         <div
                             ref={canvasRef}
-                            className={`
-                                bg-white rounded-2xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-                                shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)] hover:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)]
-                                ring-1 ring-surface-200/80
-                                ${activeView === 'mobile' ? 'scale-[0.85] origin-top' : 'scale-100'}
-                            `}
+                            className={[
+                                'bg-surface rounded-xl border border-line',
+                                'shadow-[0_1px_2px_rgba(20,20,20,0.03),0_16px_48px_-16px_rgba(20,20,20,0.12)]',
+                                'transition-transform duration-400 ease-out',
+                                activeView === 'mobile' ? 'scale-[0.85] origin-top' : 'scale-100',
+                            ].join(' ')}
                             style={{
-                                width: activeView === 'mobile' ? '375px' : `${page.width || 900}px`,
-                                maxWidth: activeView === 'mobile' ? '375px' : `${page.maxWidth || 900}px`,
-                                backgroundColor: page.background || '#ffffff',
-                                backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : undefined,
+                                width:
+                                    activeView === 'mobile' ? '375px' : `${page.width || 900}px`,
+                                maxWidth:
+                                    activeView === 'mobile'
+                                        ? '375px'
+                                        : `${page.maxWidth || 900}px`,
+                                backgroundColor: page.background || undefined,
+                                backgroundImage: page.backgroundImage
+                                    ? `url(${page.backgroundImage})`
+                                    : undefined,
                                 backgroundRepeat: page.backgroundRepeat || 'no-repeat',
                                 backgroundSize: page.backgroundSize || 'cover',
                                 borderRadius: `${page.borderRadius || 12}px`,
-                                padding: `${page.padding?.top || 48}px ${page.padding?.right || 48}px ${page.padding?.bottom || 48}px ${page.padding?.left || 48}px`,
+                                padding: `${page.padding?.top || 48}px ${
+                                    page.padding?.right || 48
+                                }px ${page.padding?.bottom || 48}px ${page.padding?.left || 48}px`,
                                 minHeight: page.height ? `${page.height}px` : 'auto',
                             }}
                         >
@@ -169,32 +178,22 @@ export default function BuilderWorkspace({
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {/* Right Side - Properties Panel */}
-            <div 
-                className={`
-                    w-80 lg:w-96 bg-white border-l border-surface-200/80 
-                    flex flex-col h-full flex-shrink-0 shadow-[-4px_0_24px_-12px_rgba(0,0,0,0.08)]
-                    transition-all duration-500 delay-200 ease-[cubic-bezier(0.4,0,0.2,1)]
-                    ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}
-                `}
+            {/* ── Right: Properties panel ────────────────────────────── */}
+            <aside
+                className={[
+                    'w-80 lg:w-96 bg-surface border-l border-line',
+                    'flex flex-col h-full flex-shrink-0',
+                    'transition-all duration-400 delay-100 ease-out',
+                    isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4',
+                ].join(' ')}
             >
-                {/* Panel Header */}
-                <div className="p-5 border-b border-surface-200/80 flex-shrink-0 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center">
-                            <Settings className="w-4 h-4 text-brand-600" />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-semibold text-surface-900 tracking-tight">Properties</h3>
-                            <p className="text-[11px] text-surface-500">Customize design</p>
-                        </div>
-                    </div>
-
-                </div>
-
-                {/* Settings Content */}
+                <PanelHeader
+                    icon={<Settings className="w-4 h-4 text-accent" strokeWidth={1.75} />}
+                    title="Properties"
+                    subtitle="Customize design"
+                />
                 <div className="flex-1 overflow-y-auto custom-scrollbar relative p-5">
                     <PropertiesPanel
                         pageLayouts={pageLayouts}
@@ -203,29 +202,54 @@ export default function BuilderWorkspace({
                         onUpdateProfessionalOptions={updateProfessionalOptions}
                     />
                 </div>
-            </div>
+            </aside>
 
-            {/* Custom Scrollbar Styles */}
+            {/* Warm scrollbar palette — matches the editorial ink/line neutrals */}
             <style>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 6px;
-                    height: 6px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(156, 163, 175, 0.3);
+                    background: rgb(var(--color-line-strong) / 0.5);
                     border-radius: 3px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(156, 163, 175, 0.5);
+                    background: rgb(var(--color-line-strong) / 0.9);
                 }
                 .custom-scrollbar {
                     scrollbar-width: thin;
-                    scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+                    scrollbar-color: rgb(var(--color-line-strong) / 0.5) transparent;
                 }
             `}</style>
+        </div>
+    )
+}
+
+/**
+ * Shared header for both side panels. Small accent icon square + serif title
+ * + muted subtitle. Kept local — the panels have no other consumers today.
+ */
+function PanelHeader({
+    icon,
+    title,
+    subtitle,
+}: {
+    icon: React.ReactNode
+    title: string
+    subtitle: string
+}) {
+    return (
+        <div className="p-5 border-b border-line flex-shrink-0 bg-surface/95 backdrop-blur-sm sticky top-0 z-10">
+            <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-md bg-accent-soft/60 border border-accent/25 flex items-center justify-center flex-shrink-0">
+                    {icon}
+                </div>
+                <div className="min-w-0">
+                    <h3 className="font-serif text-[15px] font-semibold text-ink leading-tight">
+                        {title}
+                    </h3>
+                    <p className="text-[11px] text-ink-muted">{subtitle}</p>
+                </div>
+            </div>
         </div>
     )
 }

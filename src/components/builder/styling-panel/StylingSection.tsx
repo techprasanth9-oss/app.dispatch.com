@@ -1,29 +1,55 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useState } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 
 interface StylingSectionProps {
-    title: string;
-    children: React.ReactNode;
-    defaultOpen?: boolean;
-    className?: string; // Allow additional classes to be passed
+    title: string
+    children: React.ReactNode
+    defaultOpen?: boolean
+    className?: string
 }
 
-export default function StylingSection({ title, children, defaultOpen = true, className = '' }: StylingSectionProps) {
-    const [isOpen, setIsOpen] = useState(defaultOpen);
+/**
+ * Collapsible section used to group related styling controls (Content,
+ * Typography, Colors, Spacing, Borders…). Editorial palette — same
+ * behaviour as before.
+ */
+export default function StylingSection({
+    title,
+    children,
+    defaultOpen = true,
+    className = '',
+}: StylingSectionProps) {
+    const [isOpen, setIsOpen] = useState(defaultOpen)
 
     return (
-        <div className={`border-b border-surface-100 last:border-0 ${className}`}>
+        <div className={`border-b border-line last:border-0 ${className}`}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between py-2.5 px-3 hover:bg-surface-50 transition-colors group rounded-md my-1 ${isOpen ? 'bg-surface-50/50' : ''}`}
+                className={[
+                    'w-full flex items-center justify-between py-2 px-3 rounded-md my-1 transition-colors group',
+                    isOpen
+                        ? 'bg-surface-sunken/50'
+                        : 'hover:bg-surface-sunken/40',
+                ].join(' ')}
             >
-                <span className={`text-xs font-semibold uppercase tracking-wide transition-colors ${isOpen ? 'text-surface-800' : 'text-surface-500 group-hover:text-surface-700'}`}>
+                <span
+                    className={[
+                        'text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors',
+                        isOpen ? 'text-ink' : 'text-ink-muted group-hover:text-ink',
+                    ].join(' ')}
+                >
                     {title}
                 </span>
                 {isOpen ? (
-                    <ChevronDown className="w-3.5 h-3.5 text-surface-400 group-hover:text-brand-500" />
+                    <ChevronDown
+                        className="w-3.5 h-3.5 text-ink-subtle group-hover:text-ink-muted"
+                        strokeWidth={1.75}
+                    />
                 ) : (
-                    <ChevronRight className="w-3.5 h-3.5 text-surface-400 group-hover:text-brand-500" />
+                    <ChevronRight
+                        className="w-3.5 h-3.5 text-ink-subtle group-hover:text-ink-muted"
+                        strokeWidth={1.75}
+                    />
                 )}
             </button>
             {isOpen && (
@@ -32,5 +58,5 @@ export default function StylingSection({ title, children, defaultOpen = true, cl
                 </div>
             )}
         </div>
-    );
+    )
 }

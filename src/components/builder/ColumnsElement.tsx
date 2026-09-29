@@ -67,8 +67,8 @@ function ColumnDropZone({
       style={{
         padding: columnPadding || "8px",
         minHeight: "60px",
-        backgroundColor: columnColor || (isOver ? "#e0e7ff" : "transparent"),
-        ...(isOver && !columnColor ? { border: "2px dashed #6366f1" } : {}),
+        backgroundColor: columnColor || (isOver ? "rgb(250 230 222 / 0.6)" : "transparent"),
+        ...(isOver && !columnColor ? { border: "2px dashed #D14A2E" } : {}),
       }}
       className="relative column-zone"
       onClick={(e) => {
@@ -138,7 +138,7 @@ function ColumnDropZone({
           </div>
         </SortableContext>
       ) : (
-        <div className="text-surface-400 text-xs py-4 text-center border-2 border-dashed border-surface-300 rounded">
+        <div className="text-ink-subtle text-[11.5px] py-4 text-center border-2 border-dashed border-line rounded-md bg-surface-sunken/30">
           Empty column
         </div>
       )}
@@ -192,7 +192,7 @@ export default function ColumnsElement({
   const elementStyle = {
     ...element.styles,
     position: "relative" as const,
-    outline: isSelected ? "2px solid #4f46e5" : "none",
+    outline: isSelected ? "2px solid #D14A2E" : "none",
     outlineOffset: "2px",
     minHeight: "60px",
   };
@@ -217,7 +217,7 @@ export default function ColumnsElement({
               onSelect();
             }
           }}
-          className={`relative columns-container ${columnsIsOver ? "bg-brand-50 border-2 border-brand-400 border-dashed" : ""}`}
+          className={`relative columns-container ${columnsIsOver ? "bg-accent-soft/60 border-2 border-accent border-dashed" : ""}`}
         >
           <style>
             {`
@@ -376,7 +376,7 @@ export default function ColumnsElement({
                     ${isSelected ? "opacity-100" : ""}
                 `}
       >
-        <div className="w-1 h-full bg-surface-300 hover:bg-brand-500 rounded-full" />
+        <div className="w-1 h-full bg-line hover:bg-accent rounded-full transition-colors" />
       </div>
     </div>
   );

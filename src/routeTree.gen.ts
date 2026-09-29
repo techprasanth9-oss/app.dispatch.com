@@ -9,118 +9,53 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiWorkspacesRouteImport } from './routes/api/workspaces'
-import { Route as AuthTemplatesRouteImport } from './routes/_auth.templates'
+import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthBuilderRouteImport } from './routes/_auth.builder'
-import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
-import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
-import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
-import { Route as ApiWorkspacesWsIdRouteImport } from './routes/api/workspaces.$wsId'
-import { Route as ApiTemplatesGalleryRouteImport } from './routes/api/templates.gallery'
-import { Route as ApiDevSeedRouteImport } from './routes/api/dev.seed'
-import { Route as ApiDevLoginRouteImport } from './routes/api/dev.login'
-import { Route as ApiAuthRegisterRouteImport } from './routes/api/auth.register'
-import { Route as ApiAuthMeRouteImport } from './routes/api/auth.me'
-import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth.logout'
-import { Route as AuthSettingsWorkspaceRouteImport } from './routes/_auth.settings.workspace'
+import { Route as AuthOnboardingRouteImport } from './routes/_auth.onboarding'
+import { Route as AuthSettingsRouteImport } from './routes/_auth.settings'
+import { Route as AuthTemplatesRouteImport } from './routes/_auth.templates'
 import { Route as AuthInviteTokenRouteImport } from './routes/_auth.invite.$token'
+import { Route as AuthSettingsIndexRouteImport } from './routes/_auth.settings.index'
+import { Route as AuthSettingsMembersRouteImport } from './routes/_auth.settings.members'
+import { Route as AuthSettingsProfileRouteImport } from './routes/_auth.settings.profile'
+import { Route as AuthSettingsWorkspaceRouteImport } from './routes/_auth.settings.workspace'
+import { Route as AuthSettingsWorkspacesRouteImport } from './routes/_auth.settings.workspaces'
+import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
+import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
+import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
-import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
-import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
-import { Route as ApiWorkspacesWsIdTransferRouteImport } from './routes/api/workspaces.$wsId.transfer'
-import { Route as ApiWorkspacesWsIdTemplatesRouteImport } from './routes/api/workspaces.$wsId.templates'
-import { Route as ApiWorkspacesWsIdMembersRouteImport } from './routes/api/workspaces.$wsId.members'
-import { Route as ApiInvitesTokenAcceptRouteImport } from './routes/api/invites.$token.accept'
-import { Route as ApiAuthOtpVerifyRouteImport } from './routes/api/auth.otp.verify'
-import { Route as ApiAuthOtpSendRouteImport } from './routes/api/auth.otp.send'
-import { Route as ApiWorkspacesWsIdTemplatesTplIdRouteImport } from './routes/api/workspaces.$wsId.templates.$tplId'
-import { Route as ApiWorkspacesWsIdMembersUserIdRouteImport } from './routes/api/workspaces.$wsId.members.$userId'
-import { Route as ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRouteImport } from './routes/api/workspaces.$wsId.templates.from-gallery.$predefinedId'
-import { Route as ApiWorkspacesWsIdTemplatesTplIdPreviewRouteImport } from './routes/api/workspaces.$wsId.templates.$tplId.preview'
-import { Route as ApiWorkspacesWsIdTemplatesTplIdExportRouteImport } from './routes/api/workspaces.$wsId.templates.$tplId.export'
-import { Route as ApiWorkspacesWsIdTemplatesTplIdDuplicateRouteImport } from './routes/api/workspaces.$wsId.templates.$tplId.duplicate'
-import { Route as ApiWorkspacesWsIdMembersUserIdRoleRouteImport } from './routes/api/workspaces.$wsId.members.$userId.role'
+import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
+import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/_auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiWorkspacesRoute = ApiWorkspacesRouteImport.update({
-  id: '/api/workspaces',
-  path: '/api/workspaces',
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthTemplatesRoute = AuthTemplatesRouteImport.update({
-  id: '/templates',
-  path: '/templates',
-  getParentRoute: () => AuthRoute,
 } as any)
 const AuthBuilderRoute = AuthBuilderRouteImport.update({
   id: '/builder',
   path: '/builder',
   getParentRoute: () => AuthRoute,
 } as any)
-const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
-  id: '/demo/start/server-funcs',
-  path: '/demo/start/server-funcs',
-  getParentRoute: () => rootRouteImport,
+const AuthOnboardingRoute = AuthOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthRoute,
 } as any)
-const DemoStartApiRequestRoute = DemoStartApiRequestRouteImport.update({
-  id: '/demo/start/api-request',
-  path: '/demo/start/api-request',
-  getParentRoute: () => rootRouteImport,
+const AuthSettingsRoute = AuthSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthRoute,
 } as any)
-const DemoApiNamesRoute = DemoApiNamesRouteImport.update({
-  id: '/demo/api/names',
-  path: '/demo/api/names',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiWorkspacesWsIdRoute = ApiWorkspacesWsIdRouteImport.update({
-  id: '/$wsId',
-  path: '/$wsId',
-  getParentRoute: () => ApiWorkspacesRoute,
-} as any)
-const ApiTemplatesGalleryRoute = ApiTemplatesGalleryRouteImport.update({
-  id: '/api/templates/gallery',
-  path: '/api/templates/gallery',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiDevSeedRoute = ApiDevSeedRouteImport.update({
-  id: '/api/dev/seed',
-  path: '/api/dev/seed',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiDevLoginRoute = ApiDevLoginRouteImport.update({
-  id: '/api/dev/login',
-  path: '/api/dev/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthRegisterRoute = ApiAuthRegisterRouteImport.update({
-  id: '/api/auth/register',
-  path: '/api/auth/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
-  id: '/api/auth/me',
-  path: '/api/auth/me',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
-  id: '/api/auth/logout',
-  path: '/api/auth/logout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSettingsWorkspaceRoute = AuthSettingsWorkspaceRouteImport.update({
-  id: '/settings/workspace',
-  path: '/settings/workspace',
+const AuthTemplatesRoute = AuthTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthInviteTokenRoute = AuthInviteTokenRouteImport.update({
@@ -128,19 +63,49 @@ const AuthInviteTokenRoute = AuthInviteTokenRouteImport.update({
   path: '/invite/$token',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthSettingsIndexRoute = AuthSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsMembersRoute = AuthSettingsMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsProfileRoute = AuthSettingsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsWorkspaceRoute = AuthSettingsWorkspaceRouteImport.update({
+  id: '/workspace',
+  path: '/workspace',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsWorkspacesRoute = AuthSettingsWorkspacesRouteImport.update({
+  id: '/workspaces',
+  path: '/workspaces',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const DemoApiNamesRoute = DemoApiNamesRouteImport.update({
+  id: '/demo/api/names',
+  path: '/demo/api/names',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoStartApiRequestRoute = DemoStartApiRequestRouteImport.update({
+  id: '/demo/start/api-request',
+  path: '/demo/start/api-request',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
+  id: '/demo/start/server-funcs',
+  path: '/demo/start/server-funcs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
   id: '/demo/start/ssr/',
   path: '/demo/start/ssr/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoStartSsrSpaModeRoute = DemoStartSsrSpaModeRouteImport.update({
-  id: '/demo/start/ssr/spa-mode',
-  path: '/demo/start/ssr/spa-mode',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoStartSsrFullSsrRoute = DemoStartSsrFullSsrRouteImport.update({
-  id: '/demo/start/ssr/full-ssr',
-  path: '/demo/start/ssr/full-ssr',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
@@ -148,314 +113,147 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
   path: '/demo/start/ssr/data-only',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiWorkspacesWsIdTransferRoute =
-  ApiWorkspacesWsIdTransferRouteImport.update({
-    id: '/transfer',
-    path: '/transfer',
-    getParentRoute: () => ApiWorkspacesWsIdRoute,
-  } as any)
-const ApiWorkspacesWsIdTemplatesRoute =
-  ApiWorkspacesWsIdTemplatesRouteImport.update({
-    id: '/templates',
-    path: '/templates',
-    getParentRoute: () => ApiWorkspacesWsIdRoute,
-  } as any)
-const ApiWorkspacesWsIdMembersRoute =
-  ApiWorkspacesWsIdMembersRouteImport.update({
-    id: '/members',
-    path: '/members',
-    getParentRoute: () => ApiWorkspacesWsIdRoute,
-  } as any)
-const ApiInvitesTokenAcceptRoute = ApiInvitesTokenAcceptRouteImport.update({
-  id: '/api/invites/$token/accept',
-  path: '/api/invites/$token/accept',
+const DemoStartSsrFullSsrRoute = DemoStartSsrFullSsrRouteImport.update({
+  id: '/demo/start/ssr/full-ssr',
+  path: '/demo/start/ssr/full-ssr',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthOtpVerifyRoute = ApiAuthOtpVerifyRouteImport.update({
-  id: '/api/auth/otp/verify',
-  path: '/api/auth/otp/verify',
+const DemoStartSsrSpaModeRoute = DemoStartSsrSpaModeRouteImport.update({
+  id: '/demo/start/ssr/spa-mode',
+  path: '/demo/start/ssr/spa-mode',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthOtpSendRoute = ApiAuthOtpSendRouteImport.update({
-  id: '/api/auth/otp/send',
-  path: '/api/auth/otp/send',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiWorkspacesWsIdTemplatesTplIdRoute =
-  ApiWorkspacesWsIdTemplatesTplIdRouteImport.update({
-    id: '/$tplId',
-    path: '/$tplId',
-    getParentRoute: () => ApiWorkspacesWsIdTemplatesRoute,
-  } as any)
-const ApiWorkspacesWsIdMembersUserIdRoute =
-  ApiWorkspacesWsIdMembersUserIdRouteImport.update({
-    id: '/$userId',
-    path: '/$userId',
-    getParentRoute: () => ApiWorkspacesWsIdMembersRoute,
-  } as any)
-const ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRoute =
-  ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRouteImport.update({
-    id: '/from-gallery/$predefinedId',
-    path: '/from-gallery/$predefinedId',
-    getParentRoute: () => ApiWorkspacesWsIdTemplatesRoute,
-  } as any)
-const ApiWorkspacesWsIdTemplatesTplIdPreviewRoute =
-  ApiWorkspacesWsIdTemplatesTplIdPreviewRouteImport.update({
-    id: '/preview',
-    path: '/preview',
-    getParentRoute: () => ApiWorkspacesWsIdTemplatesTplIdRoute,
-  } as any)
-const ApiWorkspacesWsIdTemplatesTplIdExportRoute =
-  ApiWorkspacesWsIdTemplatesTplIdExportRouteImport.update({
-    id: '/export',
-    path: '/export',
-    getParentRoute: () => ApiWorkspacesWsIdTemplatesTplIdRoute,
-  } as any)
-const ApiWorkspacesWsIdTemplatesTplIdDuplicateRoute =
-  ApiWorkspacesWsIdTemplatesTplIdDuplicateRouteImport.update({
-    id: '/duplicate',
-    path: '/duplicate',
-    getParentRoute: () => ApiWorkspacesWsIdTemplatesTplIdRoute,
-  } as any)
-const ApiWorkspacesWsIdMembersUserIdRoleRoute =
-  ApiWorkspacesWsIdMembersUserIdRoleRouteImport.update({
-    id: '/role',
-    path: '/role',
-    getParentRoute: () => ApiWorkspacesWsIdMembersUserIdRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/builder': typeof AuthBuilderRoute
+  '/onboarding': typeof AuthOnboardingRoute
+  '/settings': typeof AuthSettingsRouteWithChildren
   '/templates': typeof AuthTemplatesRoute
-  '/api/workspaces': typeof ApiWorkspacesRouteWithChildren
   '/invite/$token': typeof AuthInviteTokenRoute
+  '/settings/members': typeof AuthSettingsMembersRoute
+  '/settings/profile': typeof AuthSettingsProfileRoute
   '/settings/workspace': typeof AuthSettingsWorkspaceRoute
-  '/api/auth/logout': typeof ApiAuthLogoutRoute
-  '/api/auth/me': typeof ApiAuthMeRoute
-  '/api/auth/register': typeof ApiAuthRegisterRoute
-  '/api/dev/login': typeof ApiDevLoginRoute
-  '/api/dev/seed': typeof ApiDevSeedRoute
-  '/api/templates/gallery': typeof ApiTemplatesGalleryRoute
-  '/api/workspaces/$wsId': typeof ApiWorkspacesWsIdRouteWithChildren
+  '/settings/workspaces': typeof AuthSettingsWorkspacesRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/api/auth/otp/send': typeof ApiAuthOtpSendRoute
-  '/api/auth/otp/verify': typeof ApiAuthOtpVerifyRoute
-  '/api/invites/$token/accept': typeof ApiInvitesTokenAcceptRoute
-  '/api/workspaces/$wsId/members': typeof ApiWorkspacesWsIdMembersRouteWithChildren
-  '/api/workspaces/$wsId/templates': typeof ApiWorkspacesWsIdTemplatesRouteWithChildren
-  '/api/workspaces/$wsId/transfer': typeof ApiWorkspacesWsIdTransferRoute
+  '/settings/': typeof AuthSettingsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
-  '/api/workspaces/$wsId/members/$userId': typeof ApiWorkspacesWsIdMembersUserIdRouteWithChildren
-  '/api/workspaces/$wsId/templates/$tplId': typeof ApiWorkspacesWsIdTemplatesTplIdRouteWithChildren
-  '/api/workspaces/$wsId/members/$userId/role': typeof ApiWorkspacesWsIdMembersUserIdRoleRoute
-  '/api/workspaces/$wsId/templates/$tplId/duplicate': typeof ApiWorkspacesWsIdTemplatesTplIdDuplicateRoute
-  '/api/workspaces/$wsId/templates/$tplId/export': typeof ApiWorkspacesWsIdTemplatesTplIdExportRoute
-  '/api/workspaces/$wsId/templates/$tplId/preview': typeof ApiWorkspacesWsIdTemplatesTplIdPreviewRoute
-  '/api/workspaces/$wsId/templates/from-gallery/$predefinedId': typeof ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/builder': typeof AuthBuilderRoute
+  '/onboarding': typeof AuthOnboardingRoute
   '/templates': typeof AuthTemplatesRoute
-  '/api/workspaces': typeof ApiWorkspacesRouteWithChildren
   '/invite/$token': typeof AuthInviteTokenRoute
+  '/settings/members': typeof AuthSettingsMembersRoute
+  '/settings/profile': typeof AuthSettingsProfileRoute
   '/settings/workspace': typeof AuthSettingsWorkspaceRoute
-  '/api/auth/logout': typeof ApiAuthLogoutRoute
-  '/api/auth/me': typeof ApiAuthMeRoute
-  '/api/auth/register': typeof ApiAuthRegisterRoute
-  '/api/dev/login': typeof ApiDevLoginRoute
-  '/api/dev/seed': typeof ApiDevSeedRoute
-  '/api/templates/gallery': typeof ApiTemplatesGalleryRoute
-  '/api/workspaces/$wsId': typeof ApiWorkspacesWsIdRouteWithChildren
+  '/settings/workspaces': typeof AuthSettingsWorkspacesRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/api/auth/otp/send': typeof ApiAuthOtpSendRoute
-  '/api/auth/otp/verify': typeof ApiAuthOtpVerifyRoute
-  '/api/invites/$token/accept': typeof ApiInvitesTokenAcceptRoute
-  '/api/workspaces/$wsId/members': typeof ApiWorkspacesWsIdMembersRouteWithChildren
-  '/api/workspaces/$wsId/templates': typeof ApiWorkspacesWsIdTemplatesRouteWithChildren
-  '/api/workspaces/$wsId/transfer': typeof ApiWorkspacesWsIdTransferRoute
+  '/settings': typeof AuthSettingsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/demo/start/ssr': typeof DemoStartSsrIndexRoute
-  '/api/workspaces/$wsId/members/$userId': typeof ApiWorkspacesWsIdMembersUserIdRouteWithChildren
-  '/api/workspaces/$wsId/templates/$tplId': typeof ApiWorkspacesWsIdTemplatesTplIdRouteWithChildren
-  '/api/workspaces/$wsId/members/$userId/role': typeof ApiWorkspacesWsIdMembersUserIdRoleRoute
-  '/api/workspaces/$wsId/templates/$tplId/duplicate': typeof ApiWorkspacesWsIdTemplatesTplIdDuplicateRoute
-  '/api/workspaces/$wsId/templates/$tplId/export': typeof ApiWorkspacesWsIdTemplatesTplIdExportRoute
-  '/api/workspaces/$wsId/templates/$tplId/preview': typeof ApiWorkspacesWsIdTemplatesTplIdPreviewRoute
-  '/api/workspaces/$wsId/templates/from-gallery/$predefinedId': typeof ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteWithChildren
   '/_auth/builder': typeof AuthBuilderRoute
+  '/_auth/onboarding': typeof AuthOnboardingRoute
+  '/_auth/settings': typeof AuthSettingsRouteWithChildren
   '/_auth/templates': typeof AuthTemplatesRoute
-  '/api/workspaces': typeof ApiWorkspacesRouteWithChildren
   '/_auth/invite/$token': typeof AuthInviteTokenRoute
+  '/_auth/settings/members': typeof AuthSettingsMembersRoute
+  '/_auth/settings/profile': typeof AuthSettingsProfileRoute
   '/_auth/settings/workspace': typeof AuthSettingsWorkspaceRoute
-  '/api/auth/logout': typeof ApiAuthLogoutRoute
-  '/api/auth/me': typeof ApiAuthMeRoute
-  '/api/auth/register': typeof ApiAuthRegisterRoute
-  '/api/dev/login': typeof ApiDevLoginRoute
-  '/api/dev/seed': typeof ApiDevSeedRoute
-  '/api/templates/gallery': typeof ApiTemplatesGalleryRoute
-  '/api/workspaces/$wsId': typeof ApiWorkspacesWsIdRouteWithChildren
+  '/_auth/settings/workspaces': typeof AuthSettingsWorkspacesRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/api/auth/otp/send': typeof ApiAuthOtpSendRoute
-  '/api/auth/otp/verify': typeof ApiAuthOtpVerifyRoute
-  '/api/invites/$token/accept': typeof ApiInvitesTokenAcceptRoute
-  '/api/workspaces/$wsId/members': typeof ApiWorkspacesWsIdMembersRouteWithChildren
-  '/api/workspaces/$wsId/templates': typeof ApiWorkspacesWsIdTemplatesRouteWithChildren
-  '/api/workspaces/$wsId/transfer': typeof ApiWorkspacesWsIdTransferRoute
+  '/_auth/settings/': typeof AuthSettingsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
-  '/api/workspaces/$wsId/members/$userId': typeof ApiWorkspacesWsIdMembersUserIdRouteWithChildren
-  '/api/workspaces/$wsId/templates/$tplId': typeof ApiWorkspacesWsIdTemplatesTplIdRouteWithChildren
-  '/api/workspaces/$wsId/members/$userId/role': typeof ApiWorkspacesWsIdMembersUserIdRoleRoute
-  '/api/workspaces/$wsId/templates/$tplId/duplicate': typeof ApiWorkspacesWsIdTemplatesTplIdDuplicateRoute
-  '/api/workspaces/$wsId/templates/$tplId/export': typeof ApiWorkspacesWsIdTemplatesTplIdExportRoute
-  '/api/workspaces/$wsId/templates/$tplId/preview': typeof ApiWorkspacesWsIdTemplatesTplIdPreviewRoute
-  '/api/workspaces/$wsId/templates/from-gallery/$predefinedId': typeof ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/builder'
+    | '/onboarding'
+    | '/settings'
     | '/templates'
-    | '/api/workspaces'
     | '/invite/$token'
+    | '/settings/members'
+    | '/settings/profile'
     | '/settings/workspace'
-    | '/api/auth/logout'
-    | '/api/auth/me'
-    | '/api/auth/register'
-    | '/api/dev/login'
-    | '/api/dev/seed'
-    | '/api/templates/gallery'
-    | '/api/workspaces/$wsId'
+    | '/settings/workspaces'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/api/auth/otp/send'
-    | '/api/auth/otp/verify'
-    | '/api/invites/$token/accept'
-    | '/api/workspaces/$wsId/members'
-    | '/api/workspaces/$wsId/templates'
-    | '/api/workspaces/$wsId/transfer'
+    | '/settings/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
     | '/demo/start/ssr/'
-    | '/api/workspaces/$wsId/members/$userId'
-    | '/api/workspaces/$wsId/templates/$tplId'
-    | '/api/workspaces/$wsId/members/$userId/role'
-    | '/api/workspaces/$wsId/templates/$tplId/duplicate'
-    | '/api/workspaces/$wsId/templates/$tplId/export'
-    | '/api/workspaces/$wsId/templates/$tplId/preview'
-    | '/api/workspaces/$wsId/templates/from-gallery/$predefinedId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/builder'
+    | '/onboarding'
     | '/templates'
-    | '/api/workspaces'
     | '/invite/$token'
+    | '/settings/members'
+    | '/settings/profile'
     | '/settings/workspace'
-    | '/api/auth/logout'
-    | '/api/auth/me'
-    | '/api/auth/register'
-    | '/api/dev/login'
-    | '/api/dev/seed'
-    | '/api/templates/gallery'
-    | '/api/workspaces/$wsId'
+    | '/settings/workspaces'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/api/auth/otp/send'
-    | '/api/auth/otp/verify'
-    | '/api/invites/$token/accept'
-    | '/api/workspaces/$wsId/members'
-    | '/api/workspaces/$wsId/templates'
-    | '/api/workspaces/$wsId/transfer'
+    | '/settings'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
     | '/demo/start/ssr'
-    | '/api/workspaces/$wsId/members/$userId'
-    | '/api/workspaces/$wsId/templates/$tplId'
-    | '/api/workspaces/$wsId/members/$userId/role'
-    | '/api/workspaces/$wsId/templates/$tplId/duplicate'
-    | '/api/workspaces/$wsId/templates/$tplId/export'
-    | '/api/workspaces/$wsId/templates/$tplId/preview'
-    | '/api/workspaces/$wsId/templates/from-gallery/$predefinedId'
   id:
     | '__root__'
     | '/'
     | '/_auth'
     | '/_auth/builder'
+    | '/_auth/onboarding'
+    | '/_auth/settings'
     | '/_auth/templates'
-    | '/api/workspaces'
     | '/_auth/invite/$token'
+    | '/_auth/settings/members'
+    | '/_auth/settings/profile'
     | '/_auth/settings/workspace'
-    | '/api/auth/logout'
-    | '/api/auth/me'
-    | '/api/auth/register'
-    | '/api/dev/login'
-    | '/api/dev/seed'
-    | '/api/templates/gallery'
-    | '/api/workspaces/$wsId'
+    | '/_auth/settings/workspaces'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/api/auth/otp/send'
-    | '/api/auth/otp/verify'
-    | '/api/invites/$token/accept'
-    | '/api/workspaces/$wsId/members'
-    | '/api/workspaces/$wsId/templates'
-    | '/api/workspaces/$wsId/transfer'
+    | '/_auth/settings/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
     | '/demo/start/ssr/'
-    | '/api/workspaces/$wsId/members/$userId'
-    | '/api/workspaces/$wsId/templates/$tplId'
-    | '/api/workspaces/$wsId/members/$userId/role'
-    | '/api/workspaces/$wsId/templates/$tplId/duplicate'
-    | '/api/workspaces/$wsId/templates/$tplId/export'
-    | '/api/workspaces/$wsId/templates/$tplId/preview'
-    | '/api/workspaces/$wsId/templates/from-gallery/$predefinedId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
-  ApiWorkspacesRoute: typeof ApiWorkspacesRouteWithChildren
-  ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
-  ApiAuthMeRoute: typeof ApiAuthMeRoute
-  ApiAuthRegisterRoute: typeof ApiAuthRegisterRoute
-  ApiDevLoginRoute: typeof ApiDevLoginRoute
-  ApiDevSeedRoute: typeof ApiDevSeedRoute
-  ApiTemplatesGalleryRoute: typeof ApiTemplatesGalleryRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
   DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
-  ApiAuthOtpSendRoute: typeof ApiAuthOtpSendRoute
-  ApiAuthOtpVerifyRoute: typeof ApiAuthOtpVerifyRoute
-  ApiInvitesTokenAcceptRoute: typeof ApiInvitesTokenAcceptRoute
   DemoStartSsrDataOnlyRoute: typeof DemoStartSsrDataOnlyRoute
   DemoStartSsrFullSsrRoute: typeof DemoStartSsrFullSsrRoute
   DemoStartSsrSpaModeRoute: typeof DemoStartSsrSpaModeRoute
@@ -464,13 +262,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_auth': {
-      id: '/_auth'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -478,19 +269,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/workspaces': {
-      id: '/api/workspaces'
-      path: '/api/workspaces'
-      fullPath: '/api/workspaces'
-      preLoaderRoute: typeof ApiWorkspacesRouteImport
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_auth/templates': {
-      id: '/_auth/templates'
-      path: '/templates'
-      fullPath: '/templates'
-      preLoaderRoute: typeof AuthTemplatesRouteImport
-      parentRoute: typeof AuthRoute
     }
     '/_auth/builder': {
       id: '/_auth/builder'
@@ -499,81 +283,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthBuilderRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/demo/start/server-funcs': {
-      id: '/demo/start/server-funcs'
-      path: '/demo/start/server-funcs'
-      fullPath: '/demo/start/server-funcs'
-      preLoaderRoute: typeof DemoStartServerFuncsRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_auth/onboarding': {
+      id: '/_auth/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthOnboardingRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/demo/start/api-request': {
-      id: '/demo/start/api-request'
-      path: '/demo/start/api-request'
-      fullPath: '/demo/start/api-request'
-      preLoaderRoute: typeof DemoStartApiRequestRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_auth/settings': {
+      id: '/_auth/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthSettingsRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/demo/api/names': {
-      id: '/demo/api/names'
-      path: '/demo/api/names'
-      fullPath: '/demo/api/names'
-      preLoaderRoute: typeof DemoApiNamesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/workspaces/$wsId': {
-      id: '/api/workspaces/$wsId'
-      path: '/$wsId'
-      fullPath: '/api/workspaces/$wsId'
-      preLoaderRoute: typeof ApiWorkspacesWsIdRouteImport
-      parentRoute: typeof ApiWorkspacesRoute
-    }
-    '/api/templates/gallery': {
-      id: '/api/templates/gallery'
-      path: '/api/templates/gallery'
-      fullPath: '/api/templates/gallery'
-      preLoaderRoute: typeof ApiTemplatesGalleryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/dev/seed': {
-      id: '/api/dev/seed'
-      path: '/api/dev/seed'
-      fullPath: '/api/dev/seed'
-      preLoaderRoute: typeof ApiDevSeedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/dev/login': {
-      id: '/api/dev/login'
-      path: '/api/dev/login'
-      fullPath: '/api/dev/login'
-      preLoaderRoute: typeof ApiDevLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/register': {
-      id: '/api/auth/register'
-      path: '/api/auth/register'
-      fullPath: '/api/auth/register'
-      preLoaderRoute: typeof ApiAuthRegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/me': {
-      id: '/api/auth/me'
-      path: '/api/auth/me'
-      fullPath: '/api/auth/me'
-      preLoaderRoute: typeof ApiAuthMeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/logout': {
-      id: '/api/auth/logout'
-      path: '/api/auth/logout'
-      fullPath: '/api/auth/logout'
-      preLoaderRoute: typeof ApiAuthLogoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_auth/settings/workspace': {
-      id: '/_auth/settings/workspace'
-      path: '/settings/workspace'
-      fullPath: '/settings/workspace'
-      preLoaderRoute: typeof AuthSettingsWorkspaceRouteImport
+    '/_auth/templates': {
+      id: '/_auth/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof AuthTemplatesRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/invite/$token': {
@@ -583,25 +311,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthInviteTokenRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/settings/': {
+      id: '/_auth/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof AuthSettingsIndexRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/members': {
+      id: '/_auth/settings/members'
+      path: '/members'
+      fullPath: '/settings/members'
+      preLoaderRoute: typeof AuthSettingsMembersRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/profile': {
+      id: '/_auth/settings/profile'
+      path: '/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof AuthSettingsProfileRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/workspace': {
+      id: '/_auth/settings/workspace'
+      path: '/workspace'
+      fullPath: '/settings/workspace'
+      preLoaderRoute: typeof AuthSettingsWorkspaceRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/workspaces': {
+      id: '/_auth/settings/workspaces'
+      path: '/workspaces'
+      fullPath: '/settings/workspaces'
+      preLoaderRoute: typeof AuthSettingsWorkspacesRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/demo/api/names': {
+      id: '/demo/api/names'
+      path: '/demo/api/names'
+      fullPath: '/demo/api/names'
+      preLoaderRoute: typeof DemoApiNamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/start/api-request': {
+      id: '/demo/start/api-request'
+      path: '/demo/start/api-request'
+      fullPath: '/demo/start/api-request'
+      preLoaderRoute: typeof DemoStartApiRequestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo/start/server-funcs': {
+      id: '/demo/start/server-funcs'
+      path: '/demo/start/server-funcs'
+      fullPath: '/demo/start/server-funcs'
+      preLoaderRoute: typeof DemoStartServerFuncsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo/start/ssr/': {
       id: '/demo/start/ssr/'
       path: '/demo/start/ssr'
       fullPath: '/demo/start/ssr/'
       preLoaderRoute: typeof DemoStartSsrIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/start/ssr/spa-mode': {
-      id: '/demo/start/ssr/spa-mode'
-      path: '/demo/start/ssr/spa-mode'
-      fullPath: '/demo/start/ssr/spa-mode'
-      preLoaderRoute: typeof DemoStartSsrSpaModeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/start/ssr/full-ssr': {
-      id: '/demo/start/ssr/full-ssr'
-      path: '/demo/start/ssr/full-ssr'
-      fullPath: '/demo/start/ssr/full-ssr'
-      preLoaderRoute: typeof DemoStartSsrFullSsrRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/start/ssr/data-only': {
@@ -611,228 +381,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoStartSsrDataOnlyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/workspaces/$wsId/transfer': {
-      id: '/api/workspaces/$wsId/transfer'
-      path: '/transfer'
-      fullPath: '/api/workspaces/$wsId/transfer'
-      preLoaderRoute: typeof ApiWorkspacesWsIdTransferRouteImport
-      parentRoute: typeof ApiWorkspacesWsIdRoute
-    }
-    '/api/workspaces/$wsId/templates': {
-      id: '/api/workspaces/$wsId/templates'
-      path: '/templates'
-      fullPath: '/api/workspaces/$wsId/templates'
-      preLoaderRoute: typeof ApiWorkspacesWsIdTemplatesRouteImport
-      parentRoute: typeof ApiWorkspacesWsIdRoute
-    }
-    '/api/workspaces/$wsId/members': {
-      id: '/api/workspaces/$wsId/members'
-      path: '/members'
-      fullPath: '/api/workspaces/$wsId/members'
-      preLoaderRoute: typeof ApiWorkspacesWsIdMembersRouteImport
-      parentRoute: typeof ApiWorkspacesWsIdRoute
-    }
-    '/api/invites/$token/accept': {
-      id: '/api/invites/$token/accept'
-      path: '/api/invites/$token/accept'
-      fullPath: '/api/invites/$token/accept'
-      preLoaderRoute: typeof ApiInvitesTokenAcceptRouteImport
+    '/demo/start/ssr/full-ssr': {
+      id: '/demo/start/ssr/full-ssr'
+      path: '/demo/start/ssr/full-ssr'
+      fullPath: '/demo/start/ssr/full-ssr'
+      preLoaderRoute: typeof DemoStartSsrFullSsrRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/auth/otp/verify': {
-      id: '/api/auth/otp/verify'
-      path: '/api/auth/otp/verify'
-      fullPath: '/api/auth/otp/verify'
-      preLoaderRoute: typeof ApiAuthOtpVerifyRouteImport
+    '/demo/start/ssr/spa-mode': {
+      id: '/demo/start/ssr/spa-mode'
+      path: '/demo/start/ssr/spa-mode'
+      fullPath: '/demo/start/ssr/spa-mode'
+      preLoaderRoute: typeof DemoStartSsrSpaModeRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/otp/send': {
-      id: '/api/auth/otp/send'
-      path: '/api/auth/otp/send'
-      fullPath: '/api/auth/otp/send'
-      preLoaderRoute: typeof ApiAuthOtpSendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/workspaces/$wsId/templates/$tplId': {
-      id: '/api/workspaces/$wsId/templates/$tplId'
-      path: '/$tplId'
-      fullPath: '/api/workspaces/$wsId/templates/$tplId'
-      preLoaderRoute: typeof ApiWorkspacesWsIdTemplatesTplIdRouteImport
-      parentRoute: typeof ApiWorkspacesWsIdTemplatesRoute
-    }
-    '/api/workspaces/$wsId/members/$userId': {
-      id: '/api/workspaces/$wsId/members/$userId'
-      path: '/$userId'
-      fullPath: '/api/workspaces/$wsId/members/$userId'
-      preLoaderRoute: typeof ApiWorkspacesWsIdMembersUserIdRouteImport
-      parentRoute: typeof ApiWorkspacesWsIdMembersRoute
-    }
-    '/api/workspaces/$wsId/templates/from-gallery/$predefinedId': {
-      id: '/api/workspaces/$wsId/templates/from-gallery/$predefinedId'
-      path: '/from-gallery/$predefinedId'
-      fullPath: '/api/workspaces/$wsId/templates/from-gallery/$predefinedId'
-      preLoaderRoute: typeof ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRouteImport
-      parentRoute: typeof ApiWorkspacesWsIdTemplatesRoute
-    }
-    '/api/workspaces/$wsId/templates/$tplId/preview': {
-      id: '/api/workspaces/$wsId/templates/$tplId/preview'
-      path: '/preview'
-      fullPath: '/api/workspaces/$wsId/templates/$tplId/preview'
-      preLoaderRoute: typeof ApiWorkspacesWsIdTemplatesTplIdPreviewRouteImport
-      parentRoute: typeof ApiWorkspacesWsIdTemplatesTplIdRoute
-    }
-    '/api/workspaces/$wsId/templates/$tplId/export': {
-      id: '/api/workspaces/$wsId/templates/$tplId/export'
-      path: '/export'
-      fullPath: '/api/workspaces/$wsId/templates/$tplId/export'
-      preLoaderRoute: typeof ApiWorkspacesWsIdTemplatesTplIdExportRouteImport
-      parentRoute: typeof ApiWorkspacesWsIdTemplatesTplIdRoute
-    }
-    '/api/workspaces/$wsId/templates/$tplId/duplicate': {
-      id: '/api/workspaces/$wsId/templates/$tplId/duplicate'
-      path: '/duplicate'
-      fullPath: '/api/workspaces/$wsId/templates/$tplId/duplicate'
-      preLoaderRoute: typeof ApiWorkspacesWsIdTemplatesTplIdDuplicateRouteImport
-      parentRoute: typeof ApiWorkspacesWsIdTemplatesTplIdRoute
-    }
-    '/api/workspaces/$wsId/members/$userId/role': {
-      id: '/api/workspaces/$wsId/members/$userId/role'
-      path: '/role'
-      fullPath: '/api/workspaces/$wsId/members/$userId/role'
-      preLoaderRoute: typeof ApiWorkspacesWsIdMembersUserIdRoleRouteImport
-      parentRoute: typeof ApiWorkspacesWsIdMembersUserIdRoute
     }
   }
 }
 
+interface AuthSettingsRouteChildren {
+  AuthSettingsMembersRoute: typeof AuthSettingsMembersRoute
+  AuthSettingsProfileRoute: typeof AuthSettingsProfileRoute
+  AuthSettingsWorkspaceRoute: typeof AuthSettingsWorkspaceRoute
+  AuthSettingsWorkspacesRoute: typeof AuthSettingsWorkspacesRoute
+  AuthSettingsIndexRoute: typeof AuthSettingsIndexRoute
+}
+
+const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
+  AuthSettingsMembersRoute: AuthSettingsMembersRoute,
+  AuthSettingsProfileRoute: AuthSettingsProfileRoute,
+  AuthSettingsWorkspaceRoute: AuthSettingsWorkspaceRoute,
+  AuthSettingsWorkspacesRoute: AuthSettingsWorkspacesRoute,
+  AuthSettingsIndexRoute: AuthSettingsIndexRoute,
+}
+
+const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(
+  AuthSettingsRouteChildren,
+)
+
 interface AuthRouteChildren {
   AuthBuilderRoute: typeof AuthBuilderRoute
+  AuthOnboardingRoute: typeof AuthOnboardingRoute
+  AuthSettingsRoute: typeof AuthSettingsRouteWithChildren
   AuthTemplatesRoute: typeof AuthTemplatesRoute
   AuthInviteTokenRoute: typeof AuthInviteTokenRoute
-  AuthSettingsWorkspaceRoute: typeof AuthSettingsWorkspaceRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthBuilderRoute: AuthBuilderRoute,
+  AuthOnboardingRoute: AuthOnboardingRoute,
+  AuthSettingsRoute: AuthSettingsRouteWithChildren,
   AuthTemplatesRoute: AuthTemplatesRoute,
   AuthInviteTokenRoute: AuthInviteTokenRoute,
-  AuthSettingsWorkspaceRoute: AuthSettingsWorkspaceRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
-interface ApiWorkspacesWsIdMembersUserIdRouteChildren {
-  ApiWorkspacesWsIdMembersUserIdRoleRoute: typeof ApiWorkspacesWsIdMembersUserIdRoleRoute
-}
-
-const ApiWorkspacesWsIdMembersUserIdRouteChildren: ApiWorkspacesWsIdMembersUserIdRouteChildren =
-  {
-    ApiWorkspacesWsIdMembersUserIdRoleRoute:
-      ApiWorkspacesWsIdMembersUserIdRoleRoute,
-  }
-
-const ApiWorkspacesWsIdMembersUserIdRouteWithChildren =
-  ApiWorkspacesWsIdMembersUserIdRoute._addFileChildren(
-    ApiWorkspacesWsIdMembersUserIdRouteChildren,
-  )
-
-interface ApiWorkspacesWsIdMembersRouteChildren {
-  ApiWorkspacesWsIdMembersUserIdRoute: typeof ApiWorkspacesWsIdMembersUserIdRouteWithChildren
-}
-
-const ApiWorkspacesWsIdMembersRouteChildren: ApiWorkspacesWsIdMembersRouteChildren =
-  {
-    ApiWorkspacesWsIdMembersUserIdRoute:
-      ApiWorkspacesWsIdMembersUserIdRouteWithChildren,
-  }
-
-const ApiWorkspacesWsIdMembersRouteWithChildren =
-  ApiWorkspacesWsIdMembersRoute._addFileChildren(
-    ApiWorkspacesWsIdMembersRouteChildren,
-  )
-
-interface ApiWorkspacesWsIdTemplatesTplIdRouteChildren {
-  ApiWorkspacesWsIdTemplatesTplIdDuplicateRoute: typeof ApiWorkspacesWsIdTemplatesTplIdDuplicateRoute
-  ApiWorkspacesWsIdTemplatesTplIdExportRoute: typeof ApiWorkspacesWsIdTemplatesTplIdExportRoute
-  ApiWorkspacesWsIdTemplatesTplIdPreviewRoute: typeof ApiWorkspacesWsIdTemplatesTplIdPreviewRoute
-}
-
-const ApiWorkspacesWsIdTemplatesTplIdRouteChildren: ApiWorkspacesWsIdTemplatesTplIdRouteChildren =
-  {
-    ApiWorkspacesWsIdTemplatesTplIdDuplicateRoute:
-      ApiWorkspacesWsIdTemplatesTplIdDuplicateRoute,
-    ApiWorkspacesWsIdTemplatesTplIdExportRoute:
-      ApiWorkspacesWsIdTemplatesTplIdExportRoute,
-    ApiWorkspacesWsIdTemplatesTplIdPreviewRoute:
-      ApiWorkspacesWsIdTemplatesTplIdPreviewRoute,
-  }
-
-const ApiWorkspacesWsIdTemplatesTplIdRouteWithChildren =
-  ApiWorkspacesWsIdTemplatesTplIdRoute._addFileChildren(
-    ApiWorkspacesWsIdTemplatesTplIdRouteChildren,
-  )
-
-interface ApiWorkspacesWsIdTemplatesRouteChildren {
-  ApiWorkspacesWsIdTemplatesTplIdRoute: typeof ApiWorkspacesWsIdTemplatesTplIdRouteWithChildren
-  ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRoute: typeof ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRoute
-}
-
-const ApiWorkspacesWsIdTemplatesRouteChildren: ApiWorkspacesWsIdTemplatesRouteChildren =
-  {
-    ApiWorkspacesWsIdTemplatesTplIdRoute:
-      ApiWorkspacesWsIdTemplatesTplIdRouteWithChildren,
-    ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRoute:
-      ApiWorkspacesWsIdTemplatesFromGalleryPredefinedIdRoute,
-  }
-
-const ApiWorkspacesWsIdTemplatesRouteWithChildren =
-  ApiWorkspacesWsIdTemplatesRoute._addFileChildren(
-    ApiWorkspacesWsIdTemplatesRouteChildren,
-  )
-
-interface ApiWorkspacesWsIdRouteChildren {
-  ApiWorkspacesWsIdMembersRoute: typeof ApiWorkspacesWsIdMembersRouteWithChildren
-  ApiWorkspacesWsIdTemplatesRoute: typeof ApiWorkspacesWsIdTemplatesRouteWithChildren
-  ApiWorkspacesWsIdTransferRoute: typeof ApiWorkspacesWsIdTransferRoute
-}
-
-const ApiWorkspacesWsIdRouteChildren: ApiWorkspacesWsIdRouteChildren = {
-  ApiWorkspacesWsIdMembersRoute: ApiWorkspacesWsIdMembersRouteWithChildren,
-  ApiWorkspacesWsIdTemplatesRoute: ApiWorkspacesWsIdTemplatesRouteWithChildren,
-  ApiWorkspacesWsIdTransferRoute: ApiWorkspacesWsIdTransferRoute,
-}
-
-const ApiWorkspacesWsIdRouteWithChildren =
-  ApiWorkspacesWsIdRoute._addFileChildren(ApiWorkspacesWsIdRouteChildren)
-
-interface ApiWorkspacesRouteChildren {
-  ApiWorkspacesWsIdRoute: typeof ApiWorkspacesWsIdRouteWithChildren
-}
-
-const ApiWorkspacesRouteChildren: ApiWorkspacesRouteChildren = {
-  ApiWorkspacesWsIdRoute: ApiWorkspacesWsIdRouteWithChildren,
-}
-
-const ApiWorkspacesRouteWithChildren = ApiWorkspacesRoute._addFileChildren(
-  ApiWorkspacesRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
-  ApiWorkspacesRoute: ApiWorkspacesRouteWithChildren,
-  ApiAuthLogoutRoute: ApiAuthLogoutRoute,
-  ApiAuthMeRoute: ApiAuthMeRoute,
-  ApiAuthRegisterRoute: ApiAuthRegisterRoute,
-  ApiDevLoginRoute: ApiDevLoginRoute,
-  ApiDevSeedRoute: ApiDevSeedRoute,
-  ApiTemplatesGalleryRoute: ApiTemplatesGalleryRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
   DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,
-  ApiAuthOtpSendRoute: ApiAuthOtpSendRoute,
-  ApiAuthOtpVerifyRoute: ApiAuthOtpVerifyRoute,
-  ApiInvitesTokenAcceptRoute: ApiInvitesTokenAcceptRoute,
   DemoStartSsrDataOnlyRoute: DemoStartSsrDataOnlyRoute,
   DemoStartSsrFullSsrRoute: DemoStartSsrFullSsrRoute,
   DemoStartSsrSpaModeRoute: DemoStartSsrSpaModeRoute,

@@ -2,6 +2,7 @@ import React from 'react'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import appCss from "../styles.css?url";
 import { AuthProvider } from '../store/authContext'
+import NotFound from '../components/common/NotFound'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -14,7 +15,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Email Builder',
+        title: 'Mailix',
       },
     ],
     links: [
@@ -25,6 +26,7 @@ export const Route = createRootRoute({
     ],
   }),
 
+  notFoundComponent: NotFound,
   shellComponent: RootDocument,
 })
 

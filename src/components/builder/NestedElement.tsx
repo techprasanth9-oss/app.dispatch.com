@@ -52,7 +52,7 @@ export default function NestedElement({
         const elementStyle = {
             ...element.styles,
             position: 'relative' as const,
-            outline: isSelected ? '2px solid #06b6d4' : 'none',
+            outline: isSelected ? '2px solid #D14A2E' : 'none',
             outlineOffset: '2px',
         };
 
@@ -123,7 +123,7 @@ export default function NestedElement({
             case 'button':
                 const buttonContent = element.content || 'Button';
                 const buttonStyle = {
-                    backgroundColor: element.styles?.backgroundColor || '#06b6d4',
+                    backgroundColor: element.styles?.backgroundColor || '#D14A2E',
                     color: element.styles?.color || '#ffffff',
                     padding: element.styles?.padding || '12px 24px',
                     borderRadius: element.styles?.borderRadius || '8px',

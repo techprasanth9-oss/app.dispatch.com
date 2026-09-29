@@ -1,37 +1,68 @@
-import React from 'react'
 import { ArrowRight, Star } from 'lucide-react'
 
-export default function TemplateCard({ template, onOpen, actionLabel }: { template: any; onOpen: (t: any) => void; actionLabel?: string }) {
-    return (
-        <div className="group bg-white border border-surface-200 rounded-xl overflow-hidden shadow-card hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200">
-            <div className="h-44 bg-surface-100 overflow-hidden relative">
-                <img
-                    src={template.thumbnail || 'https://placehold.co/480x240/f1f5f9/94a3b8?text=Template'}
-                    alt={template.title}
-                    className="object-cover h-full w-full group-hover:scale-[1.03] transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <div className="p-5">
-                <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-surface-900 truncate">{template.title}</h3>
-                        <span className="inline-block mt-1.5 px-2.5 py-0.5 bg-brand-50 text-brand-700 text-xs font-medium rounded-md">{template.category}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-amber-500 flex-shrink-0">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        <span className="font-medium">{template.rating || 4.8}</span>
-                    </div>
-                </div>
-                <p className="mt-3 text-xs text-surface-500 line-clamp-2 leading-relaxed">{template.description}</p>
-                <button
-                    onClick={() => onOpen(template)}
-                    className="mt-4 w-full flex items-center justify-center gap-1.5 px-3 py-2.5 bg-brand-700 text-white rounded-lg text-sm font-medium hover:bg-brand-800 active:scale-[0.98] transition-all shadow-brand-sm hover:shadow-brand-md cursor-pointer"
-                >
-                    {actionLabel || 'Use template'}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-            </div>
+interface TemplateLike {
+  id?: string
+  title: string
+  category?: string
+  description?: string
+  thumbnail?: string
+  rating?: number
+}
+
+export default function TemplateCard({
+  template,
+  onOpen,
+  actionLabel,
+}: {
+  template: TemplateLike
+  onOpen: (t: TemplateLike) => void
+  actionLabel?: string
+}) {
+  return (
+    <div className="group bg-surface border border-line rounded-xl overflow-hidden shadow-[0_1px_2px_rgba(20,20,20,0.03)] hover:shadow-[0_8px_24px_-8px_rgba(20,20,20,0.12)] hover:border-line-strong transition-all duration-200">
+      <div className="h-44 bg-surface-sunken overflow-hidden relative">
+        <img
+          src={
+            template.thumbnail ||
+            'https://placehold.co/480x240/EFEAE0/6B6560?text=Template'
+          }
+          alt={template.title}
+          className="object-cover h-full w-full group-hover:scale-[1.03] transition-transform duration-500"
+        />
+      </div>
+
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="text-[14px] font-semibold text-ink truncate">
+              {template.title}
+            </h3>
+            {template.category && (
+              <span className="inline-block mt-1.5 px-2 py-0.5 bg-accent-soft/60 text-accent border border-accent/25 text-[10.5px] font-semibold uppercase tracking-wide rounded">
+                {template.category}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-[12px] text-ink-muted flex-shrink-0">
+            <Star className="w-3.5 h-3.5 fill-warning text-warning" strokeWidth={1.5} />
+            <span className="font-medium">{template.rating ?? 4.8}</span>
+          </div>
         </div>
-    )
+
+        {template.description && (
+          <p className="mt-2.5 text-[12.5px] text-ink-muted line-clamp-2 leading-relaxed">
+            {template.description}
+          </p>
+        )}
+
+        <button
+          onClick={() => onOpen(template)}
+          className="mt-4 w-full inline-flex items-center justify-center gap-1.5 h-10 px-3 bg-ink hover:bg-ink/90 text-paper rounded-md text-[13px] font-medium transition-colors"
+        >
+          {actionLabel || 'Use template'}
+          <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
+        </button>
+      </div>
+    </div>
+  )
 }
